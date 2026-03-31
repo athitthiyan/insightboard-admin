@@ -177,6 +177,7 @@ export class BookingsTableComponent implements OnInit {
 
   allBookings = signal<any[]>([]);
   filteredBookings = signal<any[]>([]);
+  loadError = signal(false);
   searchQuery = '';
   statusFilter = '';
 
@@ -184,16 +185,10 @@ export class BookingsTableComponent implements OnInit {
     this.http.get<any>(`${environment.apiUrl}/bookings`, {
       params: new HttpParams().set('per_page', 50)
     }).subscribe({
-      next: res => { this.allBookings.set(res.bookings || []); this.filter(); },
+      next: res => { this.allBookings.set(res.bookings || []); this.loadError.set(false); this.filter(); },
       error: () => {
-        const mock = [
-          { id:1, booking_ref:'BK12345678', user_name:'Sarah Mitchell', email:'sarah@example.com', room:{ hotel_name:'The Grand Azure', room_type:'penthouse' }, check_in:'2026-04-01T14:00:00Z', check_out:'2026-04-04T12:00:00Z', nights:3, total_amount:2890, status:'confirmed', payment_status:'paid' },
-          { id:2, booking_ref:'BK87654321', user_name:'James Park', email:'james@example.com', room:{ hotel_name:'Serenity Beach Resort', room_type:'suite' }, check_in:'2026-04-05T14:00:00Z', check_out:'2026-04-07T12:00:00Z', nights:2, total_amount:950.40, status:'confirmed', payment_status:'paid' },
-          { id:3, booking_ref:'BK11223344', user_name:'Priya Sharma', email:'priya@example.com', room:{ hotel_name:'Alpine Summit Lodge', room_type:'deluxe' }, check_in:'2026-04-10T14:00:00Z', check_out:'2026-04-12T12:00:00Z', nights:2, total_amount:637.60, status:'pending', payment_status:'pending' },
-          { id:4, booking_ref:'BK44556677', user_name:'Kenji Tanaka', email:'kenji@example.com', room:{ hotel_name:'Kyoto Garden Inn', room_type:'suite' }, check_in:'2026-04-15T14:00:00Z', check_out:'2026-04-17T12:00:00Z', nights:2, total_amount:706.20, status:'confirmed', payment_status:'paid' },
-          { id:5, booking_ref:'BK99887766', user_name:'Emma Wilson', email:'emma@example.com', room:{ hotel_name:'Desert Mirage Palace', room_type:'suite' }, check_in:'2026-04-20T14:00:00Z', check_out:'2026-04-23T12:00:00Z', nights:3, total_amount:1779, status:'cancelled', payment_status:'refunded' },
-        ];
-        this.allBookings.set(mock);
+        this.allBookings.set([]);
+        this.loadError.set(true);
         this.filter();
       },
     });
