@@ -23,22 +23,24 @@ import { HeaderComponent } from './shared/components/header/header.component';
       display: flex;
       min-height: 100vh;
       background: var(--ib-bg);
+    }
 
-      &__main {
-        flex: 1;
-        display: flex;
-        flex-direction: column;
-        overflow: hidden;
-        min-width: 0;
-      }
+    .admin-layout__main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      min-width: 0;
+    }
 
-      &__content {
-        flex: 1;
-        padding: 32px;
-        overflow-y: auto;
+    .admin-layout__content {
+      flex: 1;
+      padding: 32px;
+      overflow-y: auto;
+    }
 
-        @media (max-width: 768px) { padding: 20px 16px; }
-      }
+    @media (max-width: 768px) {
+      .admin-layout__content { padding: 20px 16px; }
     }
   `],
 })

@@ -83,10 +83,12 @@ import { environment } from '../../../environments/environment';
       margin-bottom: 20px;
       flex-wrap: wrap;
 
-      &__search { flex: 1; min-width: 200px; }
-      &__select { width: 160px; }
-      &__stats  { font-size: 14px; color: var(--ib-text-muted); strong { color: var(--ib-text); } }
     }
+
+    .table-toolbar__search { flex: 1; min-width: 200px; }
+    .table-toolbar__select { width: 160px; }
+    .table-toolbar__stats { font-size: 14px; color: var(--ib-text-muted); }
+    .table-toolbar__stats strong { color: var(--ib-text); }
 
     .data-table-wrap {
       background: var(--ib-surface);

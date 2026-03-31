@@ -87,16 +87,15 @@ import { environment } from '../../../environments/environment';
 
       &:hover { border-color: var(--ib-border-2); }
 
-      &__icon { font-size: 1.8rem; }
-
       strong { display: block; font-size: 1.4rem; font-weight: 800; color: var(--ib-text); }
       span   { font-size: 12px; color: var(--ib-text-muted); }
-
-      &--green strong { color: #22c55e; }
-      &--red   strong { color: #ef4444; }
-      &--yellow strong { color: #f59e0b; }
-      &--cyan  strong { color: #22d3ee; }
     }
+
+    .summary-card__icon { font-size: 1.8rem; }
+    .summary-card--green strong { color: #22c55e; }
+    .summary-card--red strong { color: #ef4444; }
+    .summary-card--yellow strong { color: #f59e0b; }
+    .summary-card--cyan strong { color: #22d3ee; }
 
     .table-toolbar { margin-bottom: 16px; }
 
