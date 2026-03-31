@@ -1,6 +1,6 @@
 export const environment = {
   production: false,
-  apiUrl: 'http://localhost:8000',
-  bookingAppUrl: 'http://localhost:4200',
-  paymentAppUrl: 'http://localhost:4201',
+  apiUrl: 'https://hotelapi-backend.onrender.com',
+  bookingAppUrl: 'https://stayease-booking-app.vercel.app/',
+  paymentAppUrl: 'https://payflow-payment-app.vercel.app/',
 };
