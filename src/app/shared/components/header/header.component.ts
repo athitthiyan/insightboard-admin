@@ -1,5 +1,6 @@
-import { Component, signal } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { AuthService } from '../../../core/services/auth.service';
 
 @Component({
   selector: 'app-header',
@@ -23,12 +24,13 @@ import { CommonModule } from '@angular/common';
           <span class="admin-header__badge">3</span>
         </div>
         <div class="admin-header__user">
-          <div class="admin-header__avatar">A</div>
+          <div class="admin-header__avatar">{{ initials() }}</div>
           <div>
-            <strong>Athitthiyan</strong>
-            <span>Admin</span>
+            <strong>{{ displayName() }}</strong>
+            <span>{{ roleLabel() }}</span>
           </div>
         </div>
+        <button class="admin-header__logout" type="button" (click)="logout()">Logout</button>
       </div>
     </header>
   `,
@@ -151,18 +153,46 @@ import { CommonModule } from '@angular/common';
       flex-shrink: 0;
     }
 
+    .admin-header__logout {
+      border: 1px solid var(--ib-border);
+      background: var(--ib-surface);
+      color: var(--ib-text);
+      border-radius: 8px;
+      padding: 8px 12px;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 600;
+    }
+
     @media (max-width: 768px) {
       .admin-header__search { display: none; }
+      .admin-header__logout { display: none; }
     }
   `],
 })
 export class HeaderComponent {
+  private auth = inject(AuthService);
+
   timeOfDay = signal('');
   today = signal('');
+  displayName = computed(() => this.auth.user()?.full_name || 'Admin');
+  roleLabel = computed(() => (this.auth.user()?.is_admin ? 'Administrator' : 'Team'));
+  initials = computed(() =>
+    (this.auth.user()?.full_name || 'Admin')
+      .split(' ')
+      .map(part => part[0])
+      .join('')
+      .slice(0, 2)
+      .toUpperCase()
+  );
 
   constructor() {
     const h = new Date().getHours();
     this.timeOfDay.set(h < 12 ? 'morning' : h < 17 ? 'afternoon' : 'evening');
     this.today.set(new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }));
+  }
+
+  logout() {
+    this.auth.logout();
   }
 }

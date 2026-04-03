@@ -1,22 +1,29 @@
-import { Component } from '@angular/core';
-import { RouterOutlet } from '@angular/router';
+import { Component, computed, inject, signal } from '@angular/core';
+import { NavigationEnd, Router, RouterOutlet } from '@angular/router';
+import { CommonModule } from '@angular/common';
+import { filter } from 'rxjs';
 import { SidebarComponent } from './shared/components/sidebar/sidebar.component';
 import { HeaderComponent } from './shared/components/header/header.component';
+import { AuthService } from './core/services/auth.service';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet, SidebarComponent, HeaderComponent],
+  imports: [CommonModule, RouterOutlet, SidebarComponent, HeaderComponent],
   template: `
-    <div class="admin-layout">
-      <app-sidebar />
-      <div class="admin-layout__main">
-        <app-header />
-        <main class="admin-layout__content">
-          <router-outlet />
-        </main>
+    @if (showAdminShell()) {
+      <div class="admin-layout">
+        <app-sidebar />
+        <div class="admin-layout__main">
+          <app-header />
+          <main class="admin-layout__content">
+            <router-outlet />
+          </main>
+        </div>
       </div>
-    </div>
+    } @else {
+      <router-outlet />
+    }
   `,
   styles: [`
     .admin-layout {
@@ -44,4 +51,20 @@ import { HeaderComponent } from './shared/components/header/header.component';
     }
   `],
 })
-export class AppComponent {}
+export class AppComponent {
+  private router = inject(Router);
+  private auth = inject(AuthService);
+  private currentUrl = signal(this.router.url);
+
+  showAdminShell = computed(() => this.currentUrl() !== '/login' && this.auth.isAuthenticated());
+
+  constructor() {
+    this.router.events
+      .pipe(filter(event => event instanceof NavigationEnd))
+      .subscribe(() => this.currentUrl.set(this.router.url));
+
+    this.auth.restoreSession()?.subscribe({
+      error: () => this.auth.logout(false),
+    });
+  }
+}

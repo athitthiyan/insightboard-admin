@@ -6,7 +6,10 @@
     "ng": "ng",
     "start": "ng serve --port 4202",
     "build": "ng build",
-    "build:prod": "ng build --configuration production"
+    "build:prod": "ng build --configuration production",
+    "test": "jest --coverage",
+    "test:ci": "jest --runInBand --coverage --coverageReporters=text-summary --coverageReporters=text",
+    "e2e": "playwright test"
   },
   "private": true,
   "dependencies": {
@@ -27,6 +30,12 @@
     "@angular-devkit/build-angular": "^17.3.0",
     "@angular/cli": "~17.3.0",
     "@angular/compiler-cli": "^17.3.0",
+    "@playwright/test": "^1.59.1",
+    "@types/jest": "^30.0.0",
+    "jest": "^30.3.0",
+    "jest-environment-jsdom": "^30.3.0",
+    "jest-preset-angular": "^14.6.2",
+    "ts-jest": "^29.4.9",
     "typescript": "~5.4.2"
   }
 }
