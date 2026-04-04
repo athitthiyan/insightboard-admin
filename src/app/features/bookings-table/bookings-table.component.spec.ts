@@ -154,6 +154,7 @@ describe('BookingsTableComponent', () => {
     await setup();
     const fixture = TestBed.createComponent(BookingsTableComponent);
     const component = fixture.componentInstance;
+    component.ngOnInit();
     httpMock.expectOne(r => r.url === `${environment.apiUrl}/bookings`).flush({ bookings: [], total: 0 });
 
     expect(component.getStatusBadge('confirmed')).toBe('badge--success');
@@ -167,6 +168,7 @@ describe('BookingsTableComponent', () => {
     await setup();
     const fixture = TestBed.createComponent(BookingsTableComponent);
     const component = fixture.componentInstance;
+    component.ngOnInit();
     httpMock.expectOne(r => r.url === `${environment.apiUrl}/bookings`).flush({ bookings: [], total: 0 });
 
     expect(component.getPaymentBadge('paid')).toBe('badge--success');

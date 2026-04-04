@@ -104,6 +104,7 @@ describe('TransactionsComponent', () => {
     await setup();
     const fixture = TestBed.createComponent(TransactionsComponent);
     const component = fixture.componentInstance;
+    component.ngOnInit();
     httpMock.expectOne(r => r.url === BASE_URL).flush({ transactions: [], total: 0 });
 
     expect(component.getBadge('success')).toBe('badge--success');
