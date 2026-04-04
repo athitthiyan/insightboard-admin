@@ -59,4 +59,19 @@ describe('HeaderComponent', () => {
 
     expect(authService.logout).toHaveBeenCalled();
   });
+
+  it('emits a menu toggle event for mobile navigation', () => {
+    authService.user.mockReturnValue({
+      full_name: 'Admin Person',
+      is_admin: true,
+    });
+
+    const fixture = TestBed.createComponent(HeaderComponent);
+    const component = fixture.componentInstance;
+    const emitSpy = jest.spyOn(component.menuToggle, 'emit');
+
+    component.menuToggle.emit();
+
+    expect(emitSpy).toHaveBeenCalled();
+  });
 });

@@ -66,4 +66,18 @@ describe('AppComponent', () => {
 
     expect(authService.logout).toHaveBeenCalledWith(false);
   });
+
+  it('toggles and closes the mobile sidebar state', () => {
+    authService.isAuthenticated.mockReturnValue(true);
+    authService.restoreSession.mockReturnValue(null);
+
+    const fixture = TestBed.createComponent(AppComponent);
+    const component = fixture.componentInstance;
+
+    expect(component.sidebarOpen()).toBe(false);
+    component.toggleSidebar();
+    expect(component.sidebarOpen()).toBe(true);
+    component.closeSidebar();
+    expect(component.sidebarOpen()).toBe(false);
+  });
 });

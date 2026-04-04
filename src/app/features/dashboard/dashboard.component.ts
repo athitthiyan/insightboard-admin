@@ -124,7 +124,7 @@ interface KPICard {
               <tbody>
                 @for (b of recentBookings(); track b.id) {
                   <tr>
-                    <td>
+                    <td data-label="Guest">
                       <div class="guest-cell">
                         <div class="guest-avatar">{{ b.user_name[0] }}</div>
                         <div>
@@ -133,15 +133,15 @@ interface KPICard {
                         </div>
                       </div>
                     </td>
-                    <td>
+                    <td data-label="Hotel">
                       <div>
                         <strong>{{ b.room?.hotel_name }}</strong>
                         <span class="room-type-pill">{{ b.room?.room_type }}</span>
                       </div>
                     </td>
-                    <td>{{ b.check_in | date:'MMM d' }}</td>
-                    <td><strong class="amount">\${{ b.total_amount | number:'1.0-0' }}</strong></td>
-                    <td><span class="badge" [class]="getStatusBadge(b.status)">{{ b.status }}</span></td>
+                    <td data-label="Check-in">{{ b.check_in | date:'MMM d' }}</td>
+                    <td data-label="Amount"><strong class="amount">\${{ b.total_amount | number:'1.0-0' }}</strong></td>
+                    <td data-label="Status"><span class="badge" [class]="getStatusBadge(b.status)">{{ b.status }}</span></td>
                   </tr>
                 }
               </tbody>
@@ -173,14 +173,14 @@ interface KPICard {
     .dashboard {
       display: flex;
       flex-direction: column;
-      gap: 24px;
+      gap: 16px;
       animation: fadeInUp 0.5s ease;
     }
 
     .kpi-grid {
       display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 16px;
+      grid-template-columns: 1fr;
+      gap: 12px;
     }
 
     .kpi-card {
@@ -250,15 +250,15 @@ interface KPICard {
     .charts-row,
     .bottom-row {
       display: grid;
-      grid-template-columns: 1fr 340px;
-      gap: 24px;
+      grid-template-columns: 1fr;
+      gap: 16px;
     }
 
     .chart-card {
       background: var(--ib-surface);
       border: 1px solid var(--ib-border);
       border-radius: 16px;
-      padding: 24px;
+      padding: 16px;
       animation: fadeInUp 0.5s ease 0.2s both;
     }
 
@@ -268,7 +268,9 @@ interface KPICard {
       display: flex;
       justify-content: space-between;
       align-items: flex-start;
-      margin-bottom: 20px;
+      margin-bottom: 16px;
+      gap: 12px;
+      flex-wrap: wrap;
     }
 
     .chart-card__header h3 { font-size: 16px; font-weight: 700; color: var(--ib-text); }
@@ -280,7 +282,7 @@ interface KPICard {
 
     .chart-card__body {
       position: relative;
-      height: 260px;
+      height: 220px;
     }
 
     .chart-card__body canvas { max-height: 100%; }
@@ -437,17 +439,77 @@ interface KPICard {
       margin-top: 4px;
     }
 
-    @media (max-width: 1200px) {
-      .kpi-grid { grid-template-columns: repeat(2, 1fr); }
+    @media (max-width: 767px) {
+      .recent-table table,
+      .recent-table thead,
+      .recent-table tbody,
+      .recent-table tr,
+      .recent-table td {
+        display: block;
+        width: 100%;
+      }
+
+      .recent-table thead {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        overflow: hidden;
+        clip: rect(0 0 0 0);
+      }
+
+      .recent-table tbody {
+        display: grid;
+        gap: 12px;
+      }
+
+      .recent-table tr {
+        border: 1px solid var(--ib-border);
+        border-radius: 14px;
+        padding: 14px;
+        background: rgba(255, 255, 255, 0.015);
+      }
+
+      .recent-table td {
+        border-bottom: none;
+        padding: 8px 0;
+      }
+
+      .recent-table td::before {
+        content: attr(data-label);
+        display: block;
+        font-size: 10px;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--ib-primary-light);
+        margin-bottom: 4px;
+      }
+
+      .chart-card__body {
+        height: 200px;
+      }
+
+      .chart-card__body--donut {
+        height: 180px;
+      }
     }
 
-    @media (max-width: 1100px) {
+    @media (min-width: 768px) {
+      .dashboard { gap: 24px; }
+      .kpi-grid { grid-template-columns: repeat(2, 1fr); gap: 16px; }
       .charts-row,
-      .bottom-row { grid-template-columns: 1fr; }
+      .bottom-row { gap: 24px; }
+      .chart-card { padding: 24px; }
+      .chart-card__body { height: 260px; }
     }
 
-    @media (max-width: 600px) {
-      .kpi-grid { grid-template-columns: 1fr; }
+    @media (min-width: 1101px) {
+      .charts-row,
+      .bottom-row { grid-template-columns: 1fr 340px; }
+    }
+
+    @media (min-width: 1201px) {
+      .kpi-grid { grid-template-columns: repeat(4, 1fr); }
     }
   `],
 })

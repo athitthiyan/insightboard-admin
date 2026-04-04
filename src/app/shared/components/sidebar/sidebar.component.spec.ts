@@ -36,4 +36,14 @@ describe('SidebarComponent', () => {
     component.toggleCollapsed();
     expect(component.collapsed()).toBe(false);
   });
+
+  it('emits a close request when navigation is triggered', () => {
+    const fixture = TestBed.createComponent(SidebarComponent);
+    const component = fixture.componentInstance;
+    const emitSpy = jest.spyOn(component.requestClose, 'emit');
+
+    component.handleNavClick();
+
+    expect(emitSpy).toHaveBeenCalled();
+  });
 });

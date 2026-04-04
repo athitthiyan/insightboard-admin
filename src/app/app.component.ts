@@ -1,10 +1,10 @@
+import { CommonModule } from '@angular/common';
 import { Component, computed, inject, signal } from '@angular/core';
 import { NavigationEnd, Router, RouterOutlet } from '@angular/router';
-import { CommonModule } from '@angular/common';
 import { filter } from 'rxjs';
-import { SidebarComponent } from './shared/components/sidebar/sidebar.component';
-import { HeaderComponent } from './shared/components/header/header.component';
 import { AuthService } from './core/services/auth.service';
+import { HeaderComponent } from './shared/components/header/header.component';
+import { SidebarComponent } from './shared/components/sidebar/sidebar.component';
 
 @Component({
   selector: 'app-root',
@@ -13,9 +13,21 @@ import { AuthService } from './core/services/auth.service';
   template: `
     @if (showAdminShell()) {
       <div class="admin-layout">
-        <app-sidebar />
+        <button
+          type="button"
+          class="admin-layout__overlay"
+          [class.admin-layout__overlay--visible]="sidebarOpen()"
+          (click)="closeSidebar()"
+          aria-label="Close navigation"
+        ></button>
+
+        <app-sidebar
+          [mobileOpen]="sidebarOpen()"
+          (requestClose)="closeSidebar()"
+        />
+
         <div class="admin-layout__main">
-          <app-header />
+          <app-header (menuToggle)="toggleSidebar()" />
           <main class="admin-layout__content">
             <router-outlet />
           </main>
@@ -27,9 +39,10 @@ import { AuthService } from './core/services/auth.service';
   `,
   styles: [`
     .admin-layout {
-      display: flex;
       min-height: 100vh;
       background: var(--ib-bg);
+      display: flex;
+      position: relative;
     }
 
     .admin-layout__main {
@@ -42,12 +55,34 @@ import { AuthService } from './core/services/auth.service';
 
     .admin-layout__content {
       flex: 1;
-      padding: 32px;
+      padding: 16px;
       overflow-y: auto;
     }
 
-    @media (max-width: 768px) {
-      .admin-layout__content { padding: 20px 16px; }
+    .admin-layout__overlay {
+      position: fixed;
+      inset: 0;
+      border: 0;
+      background: rgba(3, 7, 18, 0.72);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s ease;
+      z-index: 139;
+    }
+
+    .admin-layout__overlay--visible {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    @media (min-width: 769px) {
+      .admin-layout__content {
+        padding: 32px;
+      }
+
+      .admin-layout__overlay {
+        display: none;
+      }
     }
   `],
 })
@@ -56,15 +91,27 @@ export class AppComponent {
   private auth = inject(AuthService);
   private currentUrl = signal(this.router.url);
 
+  sidebarOpen = signal(false);
   showAdminShell = computed(() => this.currentUrl() !== '/login' && this.auth.isAuthenticated());
 
   constructor() {
     this.router.events
       .pipe(filter(event => event instanceof NavigationEnd))
-      .subscribe(() => this.currentUrl.set(this.router.url));
+      .subscribe(() => {
+        this.currentUrl.set(this.router.url);
+        this.closeSidebar();
+      });
 
     this.auth.restoreSession()?.subscribe({
       error: () => this.auth.logout(false),
     });
+  }
+
+  toggleSidebar() {
+    this.sidebarOpen.update(value => !value);
+  }
+
+  closeSidebar() {
+    this.sidebarOpen.set(false);
   }
 }

@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, signal } from '@angular/core';
+import { Component, EventEmitter, Input, Output, signal } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { environment } from '../../../../environments/environment';
 
@@ -14,14 +14,34 @@ interface NavItem {
   standalone: true,
   imports: [RouterLink, RouterLinkActive, CommonModule],
   template: `
-    <aside class="sidebar" [class.collapsed]="collapsed()">
+    <aside
+      class="sidebar"
+      [class.collapsed]="collapsed()"
+      [class.sidebar--mobile-open]="mobileOpen"
+      aria-label="Admin navigation"
+    >
       <div class="sidebar__logo">
         <span class="sidebar__logo-icon">AI</span>
         @if (!collapsed()) {
           <span class="sidebar__logo-text">Insight<span>Board</span></span>
         }
-        <button class="sidebar__toggle" type="button" (click)="toggleCollapsed()">
+
+        <button
+          class="sidebar__toggle sidebar__toggle--desktop"
+          type="button"
+          (click)="toggleCollapsed()"
+          [attr.aria-label]="collapsed() ? 'Expand sidebar' : 'Collapse sidebar'"
+        >
           {{ collapsed() ? '>' : '<' }}
+        </button>
+
+        <button
+          class="sidebar__toggle sidebar__toggle--mobile"
+          type="button"
+          (click)="requestClose.emit()"
+          aria-label="Close sidebar"
+        >
+          ×
         </button>
       </div>
 
@@ -34,6 +54,7 @@ interface NavItem {
             [routerLinkActiveOptions]="{ exact: item.route === '/' }"
             class="sidebar__nav-item"
             [title]="collapsed() ? item.label : ''"
+            (click)="handleNavClick()"
           >
             <span class="sidebar__nav-icon">{{ item.icon }}</span>
             @if (!collapsed()) { <span>{{ item.label }}</span> }
@@ -50,6 +71,7 @@ interface NavItem {
             rel="noreferrer"
             class="sidebar__nav-item sidebar__nav-item--ext"
             [title]="collapsed() ? link.label : ''"
+            (click)="handleNavClick()"
           >
             <span class="sidebar__nav-icon">{{ link.icon }}</span>
             @if (!collapsed()) { <span>{{ link.label }} -></span> }
@@ -70,21 +92,31 @@ interface NavItem {
   `,
   styles: [`
     .sidebar {
-      width: var(--sidebar-width);
-      min-height: 100vh;
+      width: min(84vw, 320px);
+      min-height: 100dvh;
       background: var(--ib-sidebar);
       border-right: 1px solid var(--ib-border);
       display: flex;
       flex-direction: column;
       flex-shrink: 0;
-      transition: width 0.3s ease;
-      position: sticky;
+      transition: transform 0.25s ease, width 0.25s ease;
+      position: fixed;
+      left: 0;
       top: 0;
-      height: 100vh;
+      bottom: 0;
+      height: 100dvh;
       overflow: hidden;
+      z-index: 140;
+      transform: translateX(-100%);
     }
 
-    .sidebar.collapsed { width: 72px; }
+    .sidebar.sidebar--mobile-open {
+      transform: translateX(0);
+    }
+
+    .sidebar.collapsed {
+      width: 72px;
+    }
 
     .sidebar__logo {
       display: flex;
@@ -110,21 +142,33 @@ interface NavItem {
       flex: 1;
     }
 
-    .sidebar__logo-text span { color: var(--ib-primary-light); }
+    .sidebar__logo-text span {
+      color: var(--ib-primary-light);
+    }
 
     .sidebar__toggle {
       background: var(--ib-surface);
       border: 1px solid var(--ib-border);
       border-radius: 6px;
       color: var(--ib-text-muted);
-      width: 24px;
-      height: 24px;
+      width: 28px;
+      height: 28px;
       font-size: 12px;
       display: flex;
       align-items: center;
       justify-content: center;
       flex-shrink: 0;
       transition: all 0.2s;
+    }
+
+    .sidebar__toggle--mobile {
+      margin-left: auto;
+      font-size: 18px;
+      display: inline-flex;
+    }
+
+    .sidebar__toggle--desktop {
+      display: none;
     }
 
     .sidebar__toggle:hover {
@@ -181,7 +225,9 @@ interface NavItem {
       font-size: 13px;
     }
 
-    .sidebar__nav-item--ext:hover { color: var(--ib-accent); }
+    .sidebar__nav-item--ext:hover {
+      color: var(--ib-accent);
+    }
 
     .sidebar__nav-icon {
       font-size: 18px;
@@ -225,19 +271,35 @@ interface NavItem {
     }
 
     @media (max-width: 768px) {
+      .sidebar.collapsed {
+        width: min(84vw, 320px);
+      }
+    }
+
+    @media (min-width: 769px) {
       .sidebar {
-        position: fixed;
-        left: 0;
-        top: 0;
-        bottom: 0;
-        z-index: 200;
+        width: var(--sidebar-width);
+        min-height: 100vh;
+        position: sticky;
+        height: 100vh;
+        transform: none;
+        z-index: auto;
       }
 
-      .sidebar.collapsed { width: 0; padding: 0; border: none; }
+      .sidebar__toggle--desktop {
+        display: inline-flex;
+      }
+
+      .sidebar__toggle--mobile {
+        display: none;
+      }
     }
   `],
 })
 export class SidebarComponent {
+  @Input() mobileOpen = false;
+  @Output() requestClose = new EventEmitter<void>();
+
   collapsed = signal(false);
 
   navItems: NavItem[] = [
@@ -253,5 +315,9 @@ export class SidebarComponent {
 
   toggleCollapsed() {
     this.collapsed.update(value => !value);
+  }
+
+  handleNavClick() {
+    this.requestClose.emit();
   }
 }
