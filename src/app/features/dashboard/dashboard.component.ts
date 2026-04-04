@@ -1,5 +1,4 @@
 import {
-  AfterViewInit,
   Component,
   ElementRef,
   OnDestroy,
@@ -452,7 +451,7 @@ interface KPICard {
     }
   `],
 })
-export class DashboardComponent implements OnInit, AfterViewInit, OnDestroy {
+export class DashboardComponent implements OnInit, OnDestroy {
   @ViewChild('revenueChart') revenueChartRef!: ElementRef<HTMLCanvasElement>;
   @ViewChild('statusChart') statusChartRef!: ElementRef<HTMLCanvasElement>;
   @ViewChild('bookingsChart') bookingsChartRef!: ElementRef<HTMLCanvasElement>;
@@ -478,8 +477,6 @@ export class DashboardComponent implements OnInit, AfterViewInit, OnDestroy {
       this.recentBookings.set(res.bookings || []);
     });
   }
-
-  ngAfterViewInit() {}
 
   ngOnDestroy() {
     this.charts.forEach(chart => chart.destroy());

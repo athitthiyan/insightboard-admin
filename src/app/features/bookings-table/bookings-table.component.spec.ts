@@ -8,15 +8,12 @@
  *   getPaymentBadge   – paid / pending / failed / refunded / unknown
  */
 
-import { of, throwError } from 'rxjs';
 import { TestBed } from '@angular/core/testing';
 import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 
 import { BookingsTableComponent } from './bookings-table.component';
 import { environment } from '../../../environments/environment';
-
-const BOOKINGS_URL = `${environment.apiUrl}/bookings?per_page=50`;
 
 const sampleBookings = [
   {
