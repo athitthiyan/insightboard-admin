@@ -1,59 +1,61 @@
-# 📊 InsightBoard — Hotel Analytics Admin Dashboard
+# InsightBoard - Hotel Analytics Admin Dashboard
 
-> A professional dark analytics dashboard with real-time charts, booking management, and transaction monitoring.
+Professional admin dashboard for hotel analytics, booking oversight, and transaction monitoring.
 
-**Live Demo:** [insightboard-admin.vercel.app](https://insightboard-admin.vercel.app)
+Live Demo: [insightboard-admin.vercel.app](https://insightboard-admin.vercel.app)
 
----
+## Features
 
-## ✨ Features
+- Live KPI cards for bookings, revenue, success rate, and daily stats
+- Revenue bar chart for the last 6 months
+- Payment status donut chart
+- Daily bookings trend chart
+- Recent bookings table
+- Room-type revenue breakdown
+- Searchable bookings page
+- Transactions monitoring page
+- Collapsible sidebar navigation
 
-- 📈 **8 Live KPI Cards** — Total bookings, revenue, success rate, avg value, today stats
-- 📊 **Revenue Bar Chart** — Monthly revenue for last 6 months (Chart.js)
-- 🍩 **Payment Donut Chart** — Success / failed / pending / refunded breakdown
-- 📉 **Daily Bookings Line Chart** — 30-day activity trend with gradient fill
-- 📋 **Recent Bookings Table** — Latest reservations with guest details
-- 📌 **Room Type Revenue Bars** — Animated progress bars by room category
-- 🔍 **Bookings Page** — Full searchable + filterable table
-- 💳 **Transactions Page** — All payment records with status badges
-- 🔀 **Collapsible Sidebar** — Icon-only or full navigation
+## Tech Stack
 
-## 🛠️ Tech Stack
+| Layer | Technology |
+|---|---|
+| Framework | Angular 17 |
+| Charts | Chart.js 4.x |
+| Styling | SCSS |
+| HTTP | Angular HttpClient |
+| State | Angular Signals |
+| Deployment | Vercel |
 
-| Layer       | Technology                    |
-|-------------|-------------------------------|
-| Framework   | Angular 17 (Standalone Components) |
-| Charts      | Chart.js 4.x                  |
-| Styling     | SCSS (Dark Indigo/Cyan Theme) |
-| Fonts       | JetBrains Mono + Inter        |
-| HTTP        | Angular HttpClient            |
-| State       | Angular Signals               |
-| Deployment  | Vercel                        |
-
-## 🚀 Quick Start
+## Quick Start
 
 ```bash
 npm install
 npm start
-# → http://localhost:4202
+# http://localhost:4202
 ```
 
-## 📂 Project Structure
+## Demo Login
 
-```
+- Email: `admin@example.com`
+- Password: `AdminPass123`
+
+These credentials are created by the backend seed endpoint. You can customize them with `SEED_ADMIN_EMAIL`, `SEED_ADMIN_PASSWORD`, and `SEED_ADMIN_NAME` in the backend environment.
+
+## Project Structure
+
+```text
 src/app/
-├── core/
-│   └── services/
-│       └── analytics.service.ts   # KPIs, charts, recent data
-├── shared/components/
-│   ├── sidebar/                   # Collapsible nav
-│   └── header/                    # Search + user info
-└── features/
-    ├── dashboard/                 # Main overview with Chart.js
-    ├── bookings-table/            # Filterable bookings
-    └── transactions/              # Payment records
+|-- core/
+|   |-- services/
+|       |-- analytics.service.ts
+|-- shared/components/
+|   |-- sidebar/
+|   |-- header/
+|-- features/
+    |-- dashboard/
+    |-- bookings-table/
+    |-- transactions/
 ```
 
----
-
-*Built by Athitthiyan — Portfolio 2026*
+Built by Athitthiyan - Portfolio 2026

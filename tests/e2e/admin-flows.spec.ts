@@ -132,7 +132,7 @@ test.describe('Login Page', () => {
     await page.getByPlaceholder('Enter your password').fill('UserPass123');
     await page.getByRole('button', { name: 'Continue to Dashboard' }).click();
 
-    await expect(page.getByText(/admin access/i)).toBeVisible({ timeout: 5_000 });
+    await expect(page.getByText('This account does not have admin access.')).toBeVisible({ timeout: 5_000 });
     await expect(page).toHaveURL(/login/);
   });
 
@@ -179,7 +179,7 @@ test.describe('Dashboard', () => {
 
     await page.goto('/');
 
-    await expect(page.getByText(/Revenue Overview|Total Bookings|Dashboard/i)).toBeVisible({ timeout: 10_000 });
+    await expect(page.getByRole('heading', { name: /Revenue Overview/i })).toBeVisible({ timeout: 10_000 });
     await expect(page.getByText('Admin User')).toBeVisible();
   });
 });
@@ -220,8 +220,32 @@ test.describe('Transactions Page', () => {
 
     await expect(page.getByText('TXN-E2E-001')).toBeVisible({ timeout: 10_000 });
     await expect(page.getByText('TXN-E2E-002')).toBeVisible();
-    // Summary cards should be populated
-    await expect(page.getByText('2')).toBeVisible(); // total count
+    await expect(page.locator('.summary-card strong').first()).toHaveText('2');
+  });
+
+  test('admin can filter transactions by status', async ({ page }) => {
+    await setupAdminSession(page);
+    await mockDashboardApis(page);
+    await page.route('**/payments/transactions**', async route => {
+      const url = route.request().url();
+      const failedOnly = url.includes('status=failed');
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify(
+          failedOnly
+            ? { transactions: [MOCK_TRANSACTIONS.transactions[1]], total: 1 }
+            : MOCK_TRANSACTIONS
+        ),
+      });
+    });
+
+    await page.goto('/transactions');
+
+    await expect(page.getByText('TXN-E2E-001')).toBeVisible();
+    await page.getByRole('combobox').selectOption('failed');
+    await expect(page.getByText('TXN-E2E-002')).toBeVisible();
+    await expect(page.getByText('TXN-E2E-001')).not.toBeVisible();
   });
 
   test('transactions page falls back to mock data on error', async ({ page }) => {
@@ -238,7 +262,7 @@ test.describe('Transactions Page', () => {
     await page.goto('/transactions');
 
     // Component falls back to hardcoded mock data
-    await expect(page.getByText(/Sarah Mitchell|James Park|Priya Sharma/)).toBeVisible({ timeout: 10_000 });
+    await expect(page.getByText('Sarah Mitchell')).toBeVisible({ timeout: 10_000 });
     await expect(page.getByText('$1,491')).toBeVisible();
   });
 });
@@ -258,5 +282,15 @@ test.describe('Logout', () => {
     // Token should be gone
     const token = await page.evaluate(() => localStorage.getItem('insightboard_access_token'));
     expect(token).toBeNull();
+  });
+
+  test('restores session from local storage on app bootstrap', async ({ page }) => {
+    await setupAdminSession(page);
+    await mockDashboardApis(page);
+
+    await page.goto('/');
+
+    await expect(page.getByText('Admin User')).toBeVisible();
+    await expect(page.getByRole('heading', { name: /Revenue Overview/i })).toBeVisible();
   });
 });
