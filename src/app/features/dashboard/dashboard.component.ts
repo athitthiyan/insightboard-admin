@@ -10,7 +10,12 @@ import {
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { Chart, registerables } from 'chart.js';
-import { AnalyticsResponse, AnalyticsService } from '../../core/services/analytics.service';
+import {
+  AnalyticsResponse,
+  AnalyticsService,
+  KPIStats,
+  RecentBooking,
+} from '../../core/services/analytics.service';
 
 Chart.register(...registerables);
 
@@ -522,7 +527,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   analytics = signal<AnalyticsResponse | null>(null);
   kpiCards = signal<KPICard[]>([]);
-  recentBookings = signal<any[]>([]);
+  recentBookings = signal<RecentBooking[]>([]);
   totalRevenue = signal(0);
 
   private charts: Chart[] = [];
@@ -544,7 +549,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
     this.charts.forEach(chart => chart.destroy());
   }
 
-  private buildKPICards(kpis: any) {
+  private buildKPICards(kpis: KPIStats) {
     this.kpiCards.set([
       { icon: 'B', label: 'Total Bookings', value: kpis.total_bookings.toLocaleString(), change: '+12.5%', positive: true, color: '#6366f1' },
       { icon: '$', label: 'Total Revenue', value: '$' + (kpis.total_revenue / 1000).toFixed(1) + 'k', change: '+29.4%', positive: true, color: '#22c55e' },
@@ -591,7 +596,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
               borderColor: 'rgba(255,255,255,0.1)',
               borderWidth: 1,
               padding: 12,
-              callbacks: { label: context => ` $${Number(context.raw).toLocaleString()}` },
+              callbacks: { label: context => ` $${Number(context.raw ?? 0).toLocaleString()}` },
             },
           },
           scales: {
@@ -677,7 +682,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
               borderColor: 'rgba(255,255,255,0.1)',
               borderWidth: 1,
               padding: 10,
-              callbacks: { label: context => ` ${context.raw} bookings` },
+              callbacks: { label: context => ` ${String(context.raw ?? 0)} bookings` },
             },
           },
           scales: {

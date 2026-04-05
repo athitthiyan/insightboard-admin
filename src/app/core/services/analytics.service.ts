@@ -28,6 +28,34 @@ export interface AnalyticsResponse {
   room_type_breakdown: { room_type: string; count: number; revenue: number }[];
 }
 
+export interface RecentBooking {
+  id: number;
+  booking_ref: string;
+  user_name: string;
+  email: string;
+  status: string;
+  payment_status?: string;
+  check_in: string;
+  check_out?: string;
+  nights?: number;
+  total_amount: number;
+  room?: {
+    hotel_name: string;
+    room_type: string;
+  } | null;
+}
+
+export interface RecentBookingsResponse {
+  bookings: RecentBooking[];
+  total: number;
+}
+
+export interface RevenueStatsResponse {
+  this_month: number;
+  last_month: number;
+  growth_percentage: number;
+}
+
 @Injectable({ providedIn: 'root' })
 export class AnalyticsService {
   private http = inject(HttpClient);
@@ -39,13 +67,13 @@ export class AnalyticsService {
     });
   }
 
-  getRecentBookings(limit = 10): Observable<any> {
-    return this.http.get(`${this.base}/recent-bookings`, {
+  getRecentBookings(limit = 10): Observable<RecentBookingsResponse> {
+    return this.http.get<RecentBookingsResponse>(`${this.base}/recent-bookings`, {
       params: new HttpParams().set('limit', limit)
     });
   }
 
-  getRevenueStats(): Observable<any> {
-    return this.http.get(`${this.base}/revenue-stats`);
+  getRevenueStats(): Observable<RevenueStatsResponse> {
+    return this.http.get<RevenueStatsResponse>(`${this.base}/revenue-stats`);
   }
 }

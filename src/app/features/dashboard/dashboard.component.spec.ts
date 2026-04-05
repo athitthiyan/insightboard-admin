@@ -2,16 +2,22 @@ import { of } from 'rxjs';
 import { ElementRef } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
+import { AnalyticsResponse, RecentBookingsResponse } from '../../core/services/analytics.service';
 
-const chartInstances: { destroy: jest.Mock; config: any }[] = [];
+type ChartConfigRecord = Record<string, unknown>;
+type CanvasContextStub = {
+  createLinearGradient: jest.Mock<{ addColorStop: jest.Mock }, [number, number, number, number]>;
+};
+
+const chartInstances: { destroy: jest.Mock; config: ChartConfigRecord }[] = [];
 
 jest.mock('chart.js', () => {
   class MockChart {
     static register = jest.fn();
-    static defaults: any = {};
+    static defaults: Record<string, unknown> = {};
     destroy = jest.fn();
 
-    constructor(_ctx: unknown, config: any) {
+    constructor(_ctx: unknown, config: ChartConfigRecord) {
       chartInstances.push({ destroy: this.destroy, config });
     }
   }
@@ -31,7 +37,7 @@ describe('DashboardComponent', () => {
     getRecentBookings: jest.fn(),
   };
 
-  const analyticsResponse = {
+  const analyticsResponse: AnalyticsResponse = {
     kpis: {
       total_bookings: 1200,
       total_revenue: 456000,
@@ -60,24 +66,26 @@ describe('DashboardComponent', () => {
     ],
   };
 
+  const recentBookingsResponse: RecentBookingsResponse = {
+    bookings: [
+      {
+        id: 1,
+        booking_ref: 'BK001',
+        user_name: 'Alex Doe',
+        email: 'alex@example.com',
+        status: 'confirmed',
+        room: { hotel_name: 'Azure', room_type: 'suite' },
+        check_in: '2026-04-10',
+        total_amount: 500,
+      },
+    ],
+    total: 1,
+  };
+
   beforeEach(async () => {
     chartInstances.length = 0;
     analyticsService.getAnalytics.mockReset().mockReturnValue(of(analyticsResponse));
-    analyticsService.getRecentBookings.mockReset().mockReturnValue(
-      of({
-        bookings: [
-          {
-            id: 1,
-            user_name: 'Alex Doe',
-            email: 'alex@example.com',
-            status: 'confirmed',
-            room: { hotel_name: 'Azure', room_type: 'suite' },
-            check_in: '2026-04-10',
-            total_amount: 500,
-          },
-        ],
-      })
-    );
+    analyticsService.getRecentBookings.mockReset().mockReturnValue(of(recentBookingsResponse));
 
     await TestBed.configureTestingModule({
       imports: [DashboardComponent],
@@ -88,12 +96,13 @@ describe('DashboardComponent', () => {
     }).compileComponents();
   });
 
-  function createCanvasRef() {
+  function createCanvasRef(): ElementRef<HTMLCanvasElement> {
     const canvas = document.createElement('canvas');
     const gradient = { addColorStop: jest.fn() };
-    jest.spyOn(canvas, 'getContext').mockReturnValue({
+    const context: CanvasContextStub = {
       createLinearGradient: jest.fn(() => gradient),
-    } as any);
+    };
+    jest.spyOn(canvas, 'getContext').mockReturnValue(context as unknown as CanvasRenderingContext2D);
     return new ElementRef(canvas);
   }
 
@@ -127,7 +136,7 @@ describe('DashboardComponent', () => {
 
   it('falls back to an empty recent bookings list when the response omits bookings', async () => {
     jest.useFakeTimers();
-    analyticsService.getRecentBookings.mockReturnValueOnce(of({}));
+    analyticsService.getRecentBookings.mockReturnValueOnce(of({ bookings: [], total: 0 }));
 
     const fixture = TestBed.createComponent(DashboardComponent);
     const component = fixture.componentInstance;
@@ -154,7 +163,13 @@ describe('DashboardComponent', () => {
     component.ngOnInit();
     await jest.advanceTimersByTimeAsync(100);
 
-    const revenueConfig = chartInstances[0].config;
+    const revenueConfig = chartInstances[0].config as {
+      data: { datasets: [{ backgroundColor: (input: { chart: { ctx: CanvasContextStub } }) => { addColorStop: jest.Mock } }] };
+      options: {
+        plugins: { tooltip: { callbacks: { label: (input: { raw: number }) => string } } };
+        scales: { y: { ticks: { callback: (value: number) => string } } };
+      };
+    };
     const revenueDataset = revenueConfig.data.datasets[0];
     const revenueLabel = revenueConfig.options.plugins.tooltip.callbacks.label({ raw: 1234 });
     const revenueTick = revenueConfig.options.scales.y.ticks.callback(4321);
@@ -169,7 +184,9 @@ describe('DashboardComponent', () => {
       },
     });
 
-    const bookingsConfig = chartInstances[2].config;
+    const bookingsConfig = chartInstances[2].config as {
+      options: { plugins: { tooltip: { callbacks: { label: (input: { raw: number }) => string } } } };
+    };
     const bookingsLabel = bookingsConfig.options.plugins.tooltip.callbacks.label({ raw: 7 });
 
     expect(revenueLabel).toBe(' $1,234');
@@ -198,14 +215,14 @@ describe('DashboardComponent', () => {
   it('destroys charts on teardown', () => {
     const fixture = TestBed.createComponent(DashboardComponent);
     const component = fixture.componentInstance;
-    (component as any).charts = [
+    (component as DashboardComponent & { charts: { destroy: jest.Mock }[] }).charts = [
       { destroy: jest.fn() },
       { destroy: jest.fn() },
     ];
 
     component.ngOnDestroy();
 
-    expect((component as any).charts[0].destroy).toHaveBeenCalled();
-    expect((component as any).charts[1].destroy).toHaveBeenCalled();
+    expect((component as DashboardComponent & { charts: { destroy: jest.Mock }[] }).charts[0].destroy).toHaveBeenCalled();
+    expect((component as DashboardComponent & { charts: { destroy: jest.Mock }[] }).charts[1].destroy).toHaveBeenCalled();
   });
 });

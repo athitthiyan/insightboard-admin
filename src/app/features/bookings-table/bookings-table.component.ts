@@ -4,6 +4,27 @@ import { Component, OnInit, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { environment } from '../../../environments/environment';
 
+interface BookingTableRow {
+  id: number;
+  booking_ref: string;
+  user_name: string;
+  email: string;
+  check_in: string;
+  check_out: string;
+  nights: number;
+  total_amount: number;
+  status: string;
+  payment_status: string;
+  room?: {
+    hotel_name: string;
+    room_type: string;
+  } | null;
+}
+
+interface BookingListResponse {
+  bookings?: BookingTableRow[];
+}
+
 @Component({
   selector: 'app-bookings-table',
   standalone: true,
@@ -277,14 +298,14 @@ import { environment } from '../../../environments/environment';
 export class BookingsTableComponent implements OnInit {
   private http = inject(HttpClient);
 
-  allBookings = signal<any[]>([]);
-  filteredBookings = signal<any[]>([]);
+  allBookings = signal<BookingTableRow[]>([]);
+  filteredBookings = signal<BookingTableRow[]>([]);
   loadError = signal(false);
   searchQuery = '';
   statusFilter = '';
 
   ngOnInit() {
-    this.http.get<any>(`${environment.apiUrl}/bookings`, {
+    this.http.get<BookingListResponse>(`${environment.apiUrl}/bookings`, {
       params: new HttpParams().set('per_page', 50),
     }).subscribe({
       next: res => {
@@ -305,7 +326,7 @@ export class BookingsTableComponent implements OnInit {
 
     if (this.searchQuery) {
       const q = this.searchQuery.toLowerCase();
-      results = results.filter(b =>
+      results = results.filter((b: BookingTableRow) =>
         b.user_name.toLowerCase().includes(q) ||
         b.booking_ref.toLowerCase().includes(q) ||
         b.email.toLowerCase().includes(q),
@@ -313,7 +334,7 @@ export class BookingsTableComponent implements OnInit {
     }
 
     if (this.statusFilter) {
-      results = results.filter(b => b.status === this.statusFilter);
+      results = results.filter((b: BookingTableRow) => b.status === this.statusFilter);
     }
 
     this.filteredBookings.set(results);
