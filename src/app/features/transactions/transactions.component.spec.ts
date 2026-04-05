@@ -54,6 +54,35 @@ describe('TransactionsComponent', () => {
     expect(component.summaryCards[3].value).toContain('500');
   });
 
+  it('falls back to derived totals when the API omits the total field', async () => {
+    await setup();
+    const fixture = TestBed.createComponent(TransactionsComponent);
+    const component = fixture.componentInstance;
+    component.ngOnInit();
+
+    const req = httpMock.expectOne(r => r.url === BASE_URL);
+    req.flush({ transactions: sampleTransactions });
+
+    expect(component.transactions().length).toBe(3);
+    expect(component.summaryCards[0].value).toBe('3');
+  });
+
+  it('handles a success payload with missing transactions by using an empty list', async () => {
+    await setup();
+    const fixture = TestBed.createComponent(TransactionsComponent);
+    const component = fixture.componentInstance;
+    component.ngOnInit();
+
+    const req = httpMock.expectOne(r => r.url === BASE_URL);
+    req.flush({ total: 0, transactions: null });
+
+    expect(component.transactions()).toEqual([]);
+    expect(component.summaryCards[0].value).toBe('0');
+    expect(component.summaryCards[1].value).toBe('0');
+    expect(component.summaryCards[2].value).toBe('0');
+    expect(component.summaryCards[3].value).toBe('$0');
+  });
+
   it('falls back to mock data on HTTP error', async () => {
     await setup();
     const fixture = TestBed.createComponent(TransactionsComponent);

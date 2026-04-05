@@ -125,6 +125,23 @@ describe('DashboardComponent', () => {
     jest.useRealTimers();
   });
 
+  it('falls back to an empty recent bookings list when the response omits bookings', async () => {
+    jest.useFakeTimers();
+    analyticsService.getRecentBookings.mockReturnValueOnce(of({}));
+
+    const fixture = TestBed.createComponent(DashboardComponent);
+    const component = fixture.componentInstance;
+    component.revenueChartRef = createCanvasRef();
+    component.statusChartRef = createCanvasRef();
+    component.bookingsChartRef = createCanvasRef();
+
+    component.ngOnInit();
+    await jest.advanceTimersByTimeAsync(100);
+
+    expect(component.recentBookings()).toEqual([]);
+    jest.useRealTimers();
+  });
+
   it('executes chart callbacks for gradients and tooltip labels', async () => {
     jest.useFakeTimers();
 
@@ -167,6 +184,13 @@ describe('DashboardComponent', () => {
     const fixture = TestBed.createComponent(DashboardComponent);
     const component = fixture.componentInstance;
     component.analytics.set({ ...analyticsResponse, room_type_breakdown: [] });
+
+    expect(component.getBarWidth(100)).toBe(0);
+  });
+
+  it('returns zero bar width when analytics data has not loaded yet', () => {
+    const fixture = TestBed.createComponent(DashboardComponent);
+    const component = fixture.componentInstance;
 
     expect(component.getBarWidth(100)).toBe(0);
   });

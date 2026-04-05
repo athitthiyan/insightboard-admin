@@ -62,6 +62,20 @@ describe('BookingsTableComponent', () => {
     expect(component.filteredBookings().length).toBe(3);
   });
 
+  it('falls back to an empty booking list when the API response omits bookings', async () => {
+    await setup();
+    const fixture = TestBed.createComponent(BookingsTableComponent);
+    const component = fixture.componentInstance;
+    component.ngOnInit();
+
+    const req = httpMock.expectOne(r => r.url === `${environment.apiUrl}/bookings`);
+    req.flush({ total: 0 });
+
+    expect(component.allBookings()).toEqual([]);
+    expect(component.filteredBookings()).toEqual([]);
+    expect(component.loadError()).toBe(false);
+  });
+
   it('sets loadError on HTTP failure (error path)', async () => {
     await setup();
     const fixture = TestBed.createComponent(BookingsTableComponent);

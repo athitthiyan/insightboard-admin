@@ -110,4 +110,22 @@ describe('LoginComponent', () => {
     expect(component.error()).toBe('Invalid email or password');
     expect(component.loading()).toBe(false);
   });
+
+  it('shows the generic error when the backend provides no detail', () => {
+    authService.login.mockReturnValue(
+      throwError(() => ({
+        error: {},
+      }))
+    );
+
+    const fixture = TestBed.createComponent(LoginComponent);
+    const component = fixture.componentInstance;
+    component.email = 'admin@example.com';
+    component.password = 'bad-password';
+
+    component.login();
+
+    expect(component.error()).toBe('Unable to sign in right now.');
+    expect(component.loading()).toBe(false);
+  });
 });

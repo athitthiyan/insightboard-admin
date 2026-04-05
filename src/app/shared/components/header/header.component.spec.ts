@@ -21,6 +21,11 @@ describe('HeaderComponent', () => {
     }).compileComponents();
   });
 
+  afterEach(() => {
+    jest.useRealTimers();
+    jest.restoreAllMocks();
+  });
+
   it('derives display name, role, and initials from the current user', () => {
     authService.user.mockReturnValue({
       full_name: 'Admin Person',
@@ -44,6 +49,45 @@ describe('HeaderComponent', () => {
     expect(component.displayName()).toBe('Admin');
     expect(component.roleLabel()).toBe('Team');
     expect(component.initials()).toBe('A');
+  });
+
+  it('derives the afternoon greeting from the current hour', () => {
+    jest.useFakeTimers().setSystemTime(new Date('2026-04-05T14:00:00'));
+    authService.user.mockReturnValue({
+      full_name: 'Admin Person',
+      is_admin: true,
+    });
+
+    const fixture = TestBed.createComponent(HeaderComponent);
+    const component = fixture.componentInstance;
+
+    expect(component.timeOfDay()).toBe('afternoon');
+  });
+
+  it('derives the morning greeting from the current hour', () => {
+    jest.useFakeTimers().setSystemTime(new Date('2026-04-05T09:00:00'));
+    authService.user.mockReturnValue({
+      full_name: 'Admin Person',
+      is_admin: true,
+    });
+
+    const fixture = TestBed.createComponent(HeaderComponent);
+    const component = fixture.componentInstance;
+
+    expect(component.timeOfDay()).toBe('morning');
+  });
+
+  it('derives the evening greeting from the current hour', () => {
+    jest.useFakeTimers().setSystemTime(new Date('2026-04-05T19:00:00'));
+    authService.user.mockReturnValue({
+      full_name: 'Admin Person',
+      is_admin: true,
+    });
+
+    const fixture = TestBed.createComponent(HeaderComponent);
+    const component = fixture.componentInstance;
+
+    expect(component.timeOfDay()).toBe('evening');
   });
 
   it('logs out when the logout action is triggered', () => {
