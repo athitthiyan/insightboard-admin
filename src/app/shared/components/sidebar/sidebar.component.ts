@@ -309,7 +309,7 @@ export class SidebarComponent {
   ];
 
   portfolioLinks = [
-    { icon: 'S', label: 'StayEase', url: environment.bookingAppUrl },
+    { icon: 'S', label: 'Stayvora', url: environment.bookingAppUrl },
     { icon: 'P', label: 'PayFlow', url: environment.paymentAppUrl },
   ];
 
