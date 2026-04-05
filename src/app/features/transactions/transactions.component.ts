@@ -4,6 +4,48 @@ import { Component, OnInit, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { environment } from '../../../environments/environment';
 
+type RefundStatus =
+  | 'refund_requested'
+  | 'refund_initiated'
+  | 'refund_processing'
+  | 'refund_success'
+  | 'refund_failed'
+  | 'refund_reversed';
+
+interface TransactionBooking {
+  id?: number;
+  user_name?: string;
+  payment_status?: string;
+  refund_status?: RefundStatus;
+  refund_gateway_reference?: string | null;
+  room?: { hotel_name?: string };
+}
+
+interface TransactionRow {
+  id: number;
+  transaction_ref: string;
+  amount: number;
+  currency: string;
+  payment_method: string;
+  card_last4?: string | null;
+  card_brand?: string | null;
+  status: string;
+  created_at: string;
+  booking?: TransactionBooking;
+}
+
+interface TransactionListResponse {
+  transactions?: TransactionRow[] | null;
+  total?: number;
+}
+
+interface RefundActionResponse {
+  timeline: {
+    refund_status: RefundStatus;
+    gateway_reference?: string | null;
+  };
+}
+
 @Component({
   selector: 'app-transactions',
   standalone: true,
@@ -11,7 +53,7 @@ import { environment } from '../../../environments/environment';
   template: `
     <div class="page-header">
       <h1>Payment <span>Transactions</span></h1>
-      <p>All financial transactions processed through PayFlow</p>
+      <p>All financial transactions processed through Stayvora</p>
     </div>
 
     <div class="txn-summary">
@@ -47,6 +89,7 @@ import { environment } from '../../../environments/environment';
             <th>Method</th>
             <th>Status</th>
             <th>Date</th>
+            <th>Actions</th>
           </tr>
         </thead>
         <tbody>
@@ -57,13 +100,41 @@ import { environment } from '../../../environments/environment';
               <td data-label="Hotel">{{ t.booking?.room?.hotel_name || '—' }}</td>
               <td data-label="Amount"><strong class="amount">\${{ t.amount | number:'1.2-2' }}</strong></td>
               <td data-label="Method">{{ t.card_brand || t.payment_method }} @if (t.card_last4) { ••{{ t.card_last4 }} }</td>
-              <td data-label="Status"><span class="badge" [class]="getBadge(t.status)">{{ t.status }}</span></td>
+              <td data-label="Status">
+                <span class="badge" [class]="getBadge(t.status)">{{ t.status }}</span>
+                @if (t.booking?.refund_status) {
+                  <div class="refund-chip">{{ formatRefundStatus(t.booking!.refund_status!) }}</div>
+                }
+              </td>
               <td data-label="Date" class="mono-text">{{ t.created_at | date:'MMM d, HH:mm' }}</td>
+              <td data-label="Actions">
+                <div class="row-actions">
+                  @if (canForceInitiateRefund(t)) {
+                    <button class="action-link" type="button" (click)="forceInitiateRefund(t)">Force initiate</button>
+                  }
+                  @if (canRetryRefund(t)) {
+                    <button class="action-link" type="button" (click)="retryRefund(t)">Retry failed</button>
+                  }
+                  @if (canMarkCompleted(t)) {
+                    <button class="action-link" type="button" (click)="markRefundCompleted(t)">Mark completed</button>
+                  }
+                  @if (canReverseRefund(t)) {
+                    <button class="action-link" type="button" (click)="reverseRefund(t)">Reverse</button>
+                  }
+                </div>
+              </td>
             </tr>
           }
         </tbody>
       </table>
     </div>
+
+    @if (actionMessage()) {
+      <p class="action-feedback action-feedback--success">{{ actionMessage() }}</p>
+    }
+    @if (actionError()) {
+      <p class="action-feedback action-feedback--error">{{ actionError() }}</p>
+    }
   `,
   styles: [`
     .txn-summary {
@@ -129,7 +200,7 @@ import { environment } from '../../../environments/environment';
     .data-table {
       width: 100%;
       border-collapse: collapse;
-      min-width: 700px;
+      min-width: 900px;
     }
 
     .data-table th {
@@ -170,6 +241,37 @@ import { environment } from '../../../environments/environment';
       font-size: 14px !important;
       font-weight: 700 !important;
     }
+
+    .refund-chip {
+      margin-top: 4px;
+      color: #c4b5fd;
+      font-size: 11px;
+      text-transform: capitalize;
+    }
+
+    .row-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .action-link {
+      background: transparent;
+      border: 1px solid var(--ib-border);
+      border-radius: 999px;
+      color: var(--ib-text);
+      cursor: pointer;
+      font-size: 11px;
+      padding: 4px 8px;
+    }
+
+    .action-feedback {
+      margin-top: 12px;
+      font-size: 13px;
+    }
+
+    .action-feedback--success { color: #22c55e; }
+    .action-feedback--error { color: #ef4444; }
 
     @media (max-width: 767px) {
       .data-table,
@@ -239,7 +341,9 @@ import { environment } from '../../../environments/environment';
 export class TransactionsComponent implements OnInit {
   private http = inject(HttpClient);
 
-  transactions = signal<any[]>([]);
+  transactions = signal<TransactionRow[]>([]);
+  actionMessage = signal('');
+  actionError = signal('');
   statusFilter = '';
 
   summaryCards = [
@@ -260,16 +364,16 @@ export class TransactionsComponent implements OnInit {
       params = params.set('status', this.statusFilter);
     }
 
-    this.http.get<any>(`${environment.apiUrl}/payments/transactions`, { params }).subscribe({
+    this.http.get<TransactionListResponse>(`${environment.apiUrl}/payments/transactions`, { params }).subscribe({
       next: res => {
         const txns = res.transactions || [];
         this.transactions.set(txns);
         this.summaryCards[0].value = String(res.total || txns.length);
-        this.summaryCards[1].value = String(txns.filter((t: any) => t.status === 'success').length);
-        this.summaryCards[2].value = String(txns.filter((t: any) => t.status === 'failed').length);
+        this.summaryCards[1].value = String(txns.filter(t => t.status === 'success').length);
+        this.summaryCards[2].value = String(txns.filter(t => t.status === 'failed').length);
         const rev = txns
-          .filter((t: any) => t.status === 'success')
-          .reduce((s: number, t: any) => s + t.amount, 0);
+          .filter(t => t.status === 'success')
+          .reduce((sum, txn) => sum + txn.amount, 0);
         this.summaryCards[3].value = `$${rev.toLocaleString('en-US', { maximumFractionDigits: 0 })}`;
       },
       error: () => {
@@ -284,7 +388,7 @@ export class TransactionsComponent implements OnInit {
             card_brand: 'Visa',
             status: 'success',
             created_at: new Date().toISOString(),
-            booking: { user_name: 'Sarah Mitchell', room: { hotel_name: 'The Grand Azure' } },
+            booking: { id: 10, user_name: 'Sarah Mitchell', room: { hotel_name: 'The Grand Azure' } },
           },
           {
             id: 2,
@@ -296,7 +400,7 @@ export class TransactionsComponent implements OnInit {
             card_brand: 'Mastercard',
             status: 'success',
             created_at: new Date(Date.now() - 86400000).toISOString(),
-            booking: { user_name: 'James Park', room: { hotel_name: 'Serenity Beach Resort' } },
+            booking: { id: 11, user_name: 'James Park', room: { hotel_name: 'Serenity Beach Resort' } },
           },
           {
             id: 3,
@@ -307,9 +411,8 @@ export class TransactionsComponent implements OnInit {
             card_last4: '0002',
             card_brand: 'Visa',
             status: 'failed',
-            failure_reason: 'Declined',
             created_at: new Date(Date.now() - 172800000).toISOString(),
-            booking: { user_name: 'Priya Sharma', room: { hotel_name: 'Alpine Summit Lodge' } },
+            booking: { id: 12, user_name: 'Priya Sharma', room: { hotel_name: 'Alpine Summit Lodge' } },
           },
         ]);
         this.summaryCards[0].value = '3';
@@ -320,7 +423,86 @@ export class TransactionsComponent implements OnInit {
     });
   }
 
-  getBadge(s: string) {
-    return { success: 'badge--success', failed: 'badge--error', pending: 'badge--warning', refunded: 'badge--cyan' }[s] || '';
+  getBadge(status: string) {
+    return { success: 'badge--success', failed: 'badge--error', pending: 'badge--warning', refunded: 'badge--cyan' }[status] || '';
+  }
+
+  formatRefundStatus(status: RefundStatus): string {
+    return status.replace(/_/g, ' ');
+  }
+
+  canForceInitiateRefund(transaction: TransactionRow): boolean {
+    return transaction.booking?.payment_status === 'paid' && !transaction.booking?.refund_status;
+  }
+
+  canRetryRefund(transaction: TransactionRow): boolean {
+    return transaction.booking?.refund_status === 'refund_failed';
+  }
+
+  canMarkCompleted(transaction: TransactionRow): boolean {
+    return !!transaction.booking?.refund_status
+      && ['refund_requested', 'refund_initiated', 'refund_processing', 'refund_failed'].includes(transaction.booking.refund_status);
+  }
+
+  canReverseRefund(transaction: TransactionRow): boolean {
+    return transaction.booking?.refund_status === 'refund_success';
+  }
+
+  forceInitiateRefund(transaction: TransactionRow): void {
+    this.updateRefundState(transaction, 'initiate', { reason: 'Manual admin refund initiation' });
+  }
+
+  retryRefund(transaction: TransactionRow): void {
+    this.updateRefundState(transaction, 'retry', { reason: 'Retry failed refund' });
+  }
+
+  markRefundCompleted(transaction: TransactionRow): void {
+    this.updateRefundState(transaction, 'complete', { reason: 'Manual refund completion' });
+  }
+
+  reverseRefund(transaction: TransactionRow): void {
+    this.updateRefundState(transaction, 'reverse', { reason: 'Incorrect refund reversed by admin' });
+  }
+
+  private updateRefundState(
+    transaction: TransactionRow,
+    action: 'initiate' | 'retry' | 'complete' | 'reverse',
+    payload: { reason: string },
+  ): void {
+    const bookingId = transaction.booking?.id;
+    if (!bookingId) {
+      this.actionError.set('Booking is missing for this transaction.');
+      return;
+    }
+
+    this.actionMessage.set('');
+    this.actionError.set('');
+    this.http
+      .post<RefundActionResponse>(
+        `${environment.apiUrl}/payments/refunds/${bookingId}/${action}`,
+        payload,
+      )
+      .subscribe({
+        next: response => {
+          this.transactions.update(rows =>
+            rows.map(row =>
+              row.id === transaction.id
+                ? {
+                    ...row,
+                    booking: {
+                      ...row.booking,
+                      refund_status: response.timeline.refund_status,
+                      refund_gateway_reference: response.timeline.gateway_reference ?? row.booking?.refund_gateway_reference,
+                    },
+                  }
+                : row,
+            ),
+          );
+          this.actionMessage.set('Refund workflow updated.');
+        },
+        error: () => {
+          this.actionError.set('We could not update the refund workflow right now.');
+        },
+      });
   }
 }

@@ -19,9 +19,9 @@ import { environment } from '../../../environments/environment';
 const BASE_URL = `${environment.apiUrl}/payments/transactions`;
 
 const sampleTransactions = [
-  { id: 1, transaction_ref: 'TXN-001', amount: 500, status: 'success', payment_method: 'card', card_brand: 'Visa', card_last4: '4242', created_at: new Date().toISOString() },
-  { id: 2, transaction_ref: 'TXN-002', amount: 200, status: 'failed',  payment_method: 'card', card_brand: 'MC',   card_last4: '5555', created_at: new Date().toISOString() },
-  { id: 3, transaction_ref: 'TXN-003', amount: 150, status: 'pending', payment_method: 'mock', card_brand: null,   card_last4: null,   created_at: new Date().toISOString() },
+  { id: 1, transaction_ref: 'TXN-001', amount: 500, status: 'success', payment_method: 'card', card_brand: 'Visa', card_last4: '4242', created_at: new Date().toISOString(), booking: { id: 101, payment_status: 'paid', room: { hotel_name: 'Ocean View' } } },
+  { id: 2, transaction_ref: 'TXN-002', amount: 200, status: 'failed',  payment_method: 'card', card_brand: 'MC',   card_last4: '5555', created_at: new Date().toISOString(), booking: { id: 102, refund_status: 'refund_failed', room: { hotel_name: 'Hill Lodge' } } },
+  { id: 3, transaction_ref: 'TXN-003', amount: 150, status: 'pending', payment_method: 'mock', card_brand: null,   card_last4: null,   created_at: new Date().toISOString(), booking: { id: 103, refund_status: 'refund_success', room: { hotel_name: 'City Nest' } } },
 ];
 
 describe('TransactionsComponent', () => {
@@ -141,5 +141,69 @@ describe('TransactionsComponent', () => {
     expect(component.getBadge('pending')).toBe('badge--warning');
     expect(component.getBadge('refunded')).toBe('badge--cyan');
     expect(component.getBadge('unknown')).toBe('');
+  });
+
+  it('exposes refund action visibility helpers', async () => {
+    await setup();
+    const fixture = TestBed.createComponent(TransactionsComponent);
+    const component = fixture.componentInstance;
+    component.ngOnInit();
+    httpMock.expectOne(r => r.url === BASE_URL).flush({ transactions: sampleTransactions, total: 3 });
+
+    expect(component.canForceInitiateRefund(sampleTransactions[0] as never)).toBe(true);
+    expect(component.canRetryRefund(sampleTransactions[1] as never)).toBe(true);
+    expect(component.canMarkCompleted(sampleTransactions[1] as never)).toBe(true);
+    expect(component.canReverseRefund(sampleTransactions[2] as never)).toBe(true);
+    expect(component.formatRefundStatus('refund_processing')).toBe('refund processing');
+  });
+
+  it('updates local transaction refund state after admin actions', async () => {
+    await setup();
+    const fixture = TestBed.createComponent(TransactionsComponent);
+    const component = fixture.componentInstance;
+    component.ngOnInit();
+    httpMock.expectOne(r => r.url === BASE_URL).flush({ transactions: sampleTransactions, total: 3 });
+
+    component.forceInitiateRefund(sampleTransactions[0] as never);
+    httpMock
+      .expectOne(`${environment.apiUrl}/payments/refunds/101/initiate`)
+      .flush({ timeline: { refund_status: 'refund_initiated', gateway_reference: 'RFND-101' } });
+    expect(component.transactions()[0].booking?.refund_status).toBe('refund_initiated');
+
+    component.retryRefund(sampleTransactions[1] as never);
+    httpMock
+      .expectOne(`${environment.apiUrl}/payments/refunds/102/retry`)
+      .flush({ timeline: { refund_status: 'refund_processing' } });
+    expect(component.transactions()[1].booking?.refund_status).toBe('refund_processing');
+
+    component.markRefundCompleted(component.transactions()[1] as never);
+    httpMock
+      .expectOne(`${environment.apiUrl}/payments/refunds/102/complete`)
+      .flush({ timeline: { refund_status: 'refund_success' } });
+    expect(component.transactions()[1].booking?.refund_status).toBe('refund_success');
+
+    component.reverseRefund(sampleTransactions[2] as never);
+    httpMock
+      .expectOne(`${environment.apiUrl}/payments/refunds/103/reverse`)
+      .flush({ timeline: { refund_status: 'refund_reversed' } });
+    expect(component.transactions()[2].booking?.refund_status).toBe('refund_reversed');
+    expect(component.actionMessage()).toBe('Refund workflow updated.');
+  });
+
+  it('surfaces refund action errors and missing booking guards', async () => {
+    await setup();
+    const fixture = TestBed.createComponent(TransactionsComponent);
+    const component = fixture.componentInstance;
+    component.ngOnInit();
+    httpMock.expectOne(r => r.url === BASE_URL).flush({ transactions: sampleTransactions, total: 3 });
+
+    component.forceInitiateRefund({ ...sampleTransactions[0], booking: undefined } as never);
+    expect(component.actionError()).toBe('Booking is missing for this transaction.');
+
+    component.forceInitiateRefund(sampleTransactions[0] as never);
+    httpMock
+      .expectOne(`${environment.apiUrl}/payments/refunds/101/initiate`)
+      .flush({}, { status: 500, statusText: 'Error' });
+    expect(component.actionError()).toBe('We could not update the refund workflow right now.');
   });
 });
