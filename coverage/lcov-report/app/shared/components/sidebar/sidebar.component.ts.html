@@ -23,9 +23,9 @@
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">100% </span>
+                <span class="strong">0% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>14/14</span>
+                <span class='fraction'>0/14</span>
             </div>
         
             
@@ -37,16 +37,16 @@
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">100% </span>
+                <span class="strong">0% </span>
                 <span class="quiet">Functions</span>
-                <span class='fraction'>4/4</span>
+                <span class='fraction'>0/4</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">100% </span>
+                <span class="strong">0% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>12/12</span>
+                <span class='fraction'>0/12</span>
             </div>
         
             
@@ -61,7 +61,7 @@
             </div>
         </template>
     </div>
-    <div class='status-line high'></div>
+    <div class='status-line low'></div>
     <pre><table class="coverage">
 <tr><td class="line-count quiet"><a name='L1'></a><a href='#L1'>1</a>
 <a name='L2'></a><a href='#L2'>2</a>
@@ -386,10 +386,10 @@
 <a name='L321'></a><a href='#L321'>321</a>
 <a name='L322'></a><a href='#L322'>322</a>
 <a name='L323'></a><a href='#L323'>323</a>
-<a name='L324'></a><a href='#L324'>324</a></td><td class="line-coverage quiet"><span class="cline-any cline-yes">2x</span>
-<span class="cline-any cline-yes">2x</span>
-<span class="cline-any cline-yes">2x</span>
-<span class="cline-any cline-yes">2x</span>
+<a name='L324'></a><a href='#L324'>324</a></td><td class="line-coverage quiet"><span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -684,35 +684,35 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">2x</span>
-<span class="cline-any cline-yes">3x</span>
-<span class="cline-any cline-yes">3x</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">3x</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">3x</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">3x</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">import { CommonModule } from '@angular/common';
-import { Component, EventEmitter, Input, Output, signal } from '@angular/core';
-import { RouterLink, RouterLinkActive } from '@angular/router';
-import { environment } from '../../../../environments/environment';
+<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js"><span class="cstat-no" title="statement not covered" >import { CommonModule } from '@angular/common';</span>
+<span class="cstat-no" title="statement not covered" >import { Component, EventEmitter, Input, Output, signal } from '@angular/core';</span>
+<span class="cstat-no" title="statement not covered" >import { RouterLink, RouterLinkActive } from '@angular/router';</span>
+<span class="cstat-no" title="statement not covered" >import { environment } from '../../../../environments/environment';</span>
 &nbsp;
 interface NavItem {
   icon: string;
@@ -1007,29 +1007,29 @@ interface NavItem {
     }
   `],
 })
-export class SidebarComponent {
-  @Input() mobileOpen = false;
-  @Output() requestClose = new EventEmitter&lt;void&gt;();
+export <span class="fstat-no" title="function not covered" >class <span class="cstat-no" title="statement not covered" ><span class="cstat-no" title="statement not covered" >S</span>idebarComponent </span>{</span>
+  @Input() <span class="cstat-no" title="statement not covered" >mobileOpen = false;</span>
+  @Output() <span class="cstat-no" title="statement not covered" >requestClose = new EventEmitter&lt;void&gt;();</span>
 &nbsp;
-  collapsed = signal(false);
+<span class="cstat-no" title="statement not covered" >  collapsed = signal(false);</span>
 &nbsp;
-  navItems: NavItem[] = [
+<span class="cstat-no" title="statement not covered" >  navItems: NavItem[] = [</span>
     { icon: 'O', label: 'Overview', route: '/' },
     { icon: 'B', label: 'Bookings', route: '/bookings' },
     { icon: 'T', label: 'Transactions', route: '/transactions' },
   ];
 &nbsp;
-  portfolioLinks = [
-    { icon: 'S', label: 'StayEase', url: environment.bookingAppUrl },
+<span class="cstat-no" title="statement not covered" >  portfolioLinks = [</span>
+    { icon: 'S', label: 'Stayvora', url: environment.bookingAppUrl },
     { icon: 'P', label: 'PayFlow', url: environment.paymentAppUrl },
   ];
 &nbsp;
-  toggleCollapsed() {
-    this.collapsed.update(value =&gt; !value);
+<span class="fstat-no" title="function not covered" >  toggleCollapsed(</span>) {
+<span class="cstat-no" title="statement not covered" >    this.collapsed.update(<span class="fstat-no" title="function not covered" >value </span>=&gt; <span class="cstat-no" title="statement not covered" >!value)</span>;</span>
   }
 &nbsp;
-  handleNavClick() {
-    this.requestClose.emit();
+<span class="fstat-no" title="function not covered" >  handleNavClick(</span>) {
+<span class="cstat-no" title="statement not covered" >    this.requestClose.emit();</span>
   }
 }
 &nbsp;</pre></td></tr></table></pre>
@@ -1039,7 +1039,7 @@ export class SidebarComponent {
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2026-04-05T15:34:54.802Z
+                at 2026-04-05T22:22:26.791Z
             </div>
         <script src="../../../../prettify.js"></script>
         <script>

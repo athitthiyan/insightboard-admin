@@ -7,6 +7,7 @@ describe('routes', () => {
       '',
       'bookings',
       'transactions',
+      'incidents',
       '**',
     ]);
   });
@@ -16,6 +17,7 @@ describe('routes', () => {
     expect(routes.find(route => route.path === '')?.canActivate?.length).toBe(1);
     expect(routes.find(route => route.path === 'bookings')?.canActivate?.length).toBe(1);
     expect(routes.find(route => route.path === 'transactions')?.canActivate?.length).toBe(1);
+    expect(routes.find(route => route.path === 'incidents')?.canActivate?.length).toBe(1);
     expect(routes.find(route => route.path === '**')?.redirectTo).toBe('');
   });
 
@@ -26,7 +28,7 @@ describe('routes', () => {
         .map(route => route.loadComponent!())
     );
 
-    expect(loaded).toHaveLength(4);
+    expect(loaded).toHaveLength(5);
     expect(loaded.every(component => !!component)).toBe(true);
   });
 });

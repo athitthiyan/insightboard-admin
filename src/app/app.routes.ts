@@ -29,5 +29,12 @@ export const routes: Routes = [
     title: 'Transactions - InsightBoard',
     canActivate: [adminAuthGuard],
   },
+  {
+    path: 'incidents',
+    loadComponent: () =>
+      import('./features/incidents/incidents.component').then(m => m.IncidentsComponent),
+    title: 'Incidents - InsightBoard',
+    canActivate: [adminAuthGuard],
+  },
   { path: '**', redirectTo: '' },
 ];
