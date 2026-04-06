@@ -1,6 +1,7 @@
 export const environment = {
   production: false,
-  apiUrl: 'https://hotel-api-production-447d.up.railway.app',
-  bookingAppUrl: 'https://stayease-booking-app.vercel.app/',
-  paymentAppUrl: 'https://payflow-payment-app.vercel.app/',
-};
+  apiUrl: 'http://127.0.0.1:8000',
+  apiBaseUrl: 'http://127.0.0.1:8000',
+  bookingAppUrl: 'http://localhost:4200',
+  customerPortalUrl: 'http://localhost:4200',
+  paymentAppUrl: 'http:/

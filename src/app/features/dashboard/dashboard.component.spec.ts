@@ -226,7 +226,4 @@ describe('DashboardComponent', () => {
 
     component.ngOnDestroy();
 
-    expect(componentAccess.charts[0].destroy).toHaveBeenCalled();
-    expect(componentAccess.charts[1].destroy).toHaveBeenCalled();
-  });
-});
+    expect(comp
