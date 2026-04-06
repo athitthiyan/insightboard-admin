@@ -8,6 +8,9 @@ type ChartConfigRecord = Record<string, unknown>;
 type CanvasContextStub = {
   createLinearGradient: jest.Mock<{ addColorStop: jest.Mock }, [number, number, number, number]>;
 };
+type DashboardComponentTestAccess = {
+  ['charts']: { destroy: jest.Mock }[];
+};
 
 const chartInstances: { destroy: jest.Mock; config: ChartConfigRecord }[] = [];
 
@@ -100,7 +103,7 @@ describe('DashboardComponent', () => {
     const canvas = document.createElement('canvas');
     const gradient = { addColorStop: jest.fn() };
     const context: CanvasContextStub = {
-      createLinearGradient: jest.fn(() => gradient),
+      createLinearGradient: jest.fn<{ addColorStop: jest.Mock }, [number, number, number, number]>(() => gradient),
     };
     jest.spyOn(canvas, 'getContext').mockReturnValue(context as unknown as CanvasRenderingContext2D);
     return new ElementRef(canvas);
@@ -176,10 +179,10 @@ describe('DashboardComponent', () => {
     const revenueGradient = revenueDataset.backgroundColor({
       chart: {
         ctx: {
-          createLinearGradient: () => {
+          createLinearGradient: jest.fn<{ addColorStop: jest.Mock }, [number, number, number, number]>(() => {
             const gradient = { addColorStop: jest.fn() };
             return gradient;
-          },
+          }),
         },
       },
     });
@@ -215,14 +218,15 @@ describe('DashboardComponent', () => {
   it('destroys charts on teardown', () => {
     const fixture = TestBed.createComponent(DashboardComponent);
     const component = fixture.componentInstance;
-    (component as DashboardComponent & { charts: { destroy: jest.Mock }[] }).charts = [
+    const componentAccess = component as unknown as DashboardComponentTestAccess;
+    componentAccess.charts = [
       { destroy: jest.fn() },
       { destroy: jest.fn() },
     ];
 
     component.ngOnDestroy();
 
-    expect((component as DashboardComponent & { charts: { destroy: jest.Mock }[] }).charts[0].destroy).toHaveBeenCalled();
-    expect((component as DashboardComponent & { charts: { destroy: jest.Mock }[] }).charts[1].destroy).toHaveBeenCalled();
+    expect(componentAccess.charts[0].destroy).toHaveBeenCalled();
+    expect(componentAccess.charts[1].destroy).toHaveBeenCalled();
   });
 });

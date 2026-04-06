@@ -11,7 +11,7 @@ describe('SidebarComponent', () => {
     }).compileComponents();
   });
 
-  it('renders nav items and portfolio links', () => {
+  it('renders nav items and channel links', () => {
     const fixture = TestBed.createComponent(SidebarComponent);
     fixture.detectChanges();
 
@@ -22,7 +22,7 @@ describe('SidebarComponent', () => {
     expect(component.portfolioLinks.length).toBe(2);
     expect(element.textContent).toContain('Insight');
     expect(element.textContent).toContain('Overview');
-    expect(element.textContent).toContain('Portfolio');
+    expect(element.textContent).toContain('Channels');
     expect(element.textContent).toContain('API Connected');
   });
 
