@@ -22,7 +22,7 @@ import { AuthService } from '../../core/services/auth.service';
               type="email"
               name="email"
               [(ngModel)]="email"
-              placeholder="admin@example.com"
+              placeholder="ops@stayvora.co.in"
               [disabled]="loading()"
               required
             />

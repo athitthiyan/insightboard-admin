@@ -62,7 +62,7 @@ interface NavItem {
         }
 
         <div class="sidebar__divider"></div>
-        <div class="sidebar__section-label">@if (!collapsed()) { Portfolio }</div>
+        <div class="sidebar__section-label">@if (!collapsed()) { Channels }</div>
 
         @for (link of portfolioLinks; track link.label) {
           <a

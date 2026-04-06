@@ -2,7 +2,7 @@
 
 Professional admin dashboard for hotel analytics, booking oversight, and transaction monitoring.
 
-Live Demo: [insightboard-admin.vercel.app](https://insightboard-admin.vercel.app)
+Live App: [insightboard-admin.vercel.app](https://insightboard-admin.vercel.app)
 
 ## Features
 
@@ -35,9 +35,9 @@ npm start
 # http://localhost:4202
 ```
 
-## Demo Login
+## Seeded Login
 
-- Email: `admin@example.com`
+- Email: `ops@stayvora.co.in`
 - Password: `AdminPass123`
 
 These credentials are created by the backend seed endpoint. You can customize them with `SEED_ADMIN_EMAIL`, `SEED_ADMIN_PASSWORD`, and `SEED_ADMIN_NAME` in the backend environment.
@@ -58,4 +58,4 @@ src/app/
     |-- transactions/
 ```
 
-Built by Athitthiyan - Portfolio 2026
+Built for Stayvora operations.
