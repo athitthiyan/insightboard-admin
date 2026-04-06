@@ -102,9 +102,12 @@ export class AppComponent {
         this.closeSidebar();
       });
 
-    this.auth.restoreSession()?.subscribe({
-      error: () => this.auth.logout(false),
-    });
+    const restoreObs = this.auth.restoreSession();
+    if (restoreObs) {
+      restoreObs.subscribe({
+        error: () => this.auth.logout(false),
+      });
+    }
   }
 
   toggleSidebar() {
