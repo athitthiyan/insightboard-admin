@@ -63,12 +63,18 @@ describe('AuthService', () => {
     expect(localStorage.getItem('insightboard_access_token')).toBe('access-token');
   });
 
-  it('clears auth state and redirects on logout by default', async () => {
+  it('clears auth state, calls logout endpoint, and redirects on logout by default', async () => {
     jest.spyOn(router, 'navigate').mockResolvedValue(true);
     service.login('admin@example.com', 'AdminPass123').subscribe();
     httpMock.expectOne(`${environment.apiUrl}/auth/login`).flush(authResponse);
 
     service.logout();
+
+    // Flush the fire-and-forget logout POST
+    const logoutReq = httpMock.expectOne(`${environment.apiUrl}/auth/logout`);
+    expect(logoutReq.request.method).toBe('POST');
+    expect(logoutReq.request.body).toEqual({ refresh_token: 'refresh-token' });
+    logoutReq.flush({ message: 'Logged out successfully' });
 
     expect(service.accessToken()).toBeNull();
     expect(service.user()).toBeNull();

@@ -44,7 +44,20 @@ export class AuthService {
     );
   }
 
+  refreshToken$(): Observable<AuthResponse> {
+    return this.http.post<AuthResponse>(`${environment.apiUrl}/auth/refresh`, {
+      refresh_token: this.refreshTokenState(),
+    }).pipe(
+      tap(response => this.applyAuth(response))
+    );
+  }
+
   logout(redirect = true) {
+    // Revoke refresh token server-side (fire-and-forget)
+    const rt = this.refreshTokenState();
+    if (rt) {
+      this.http.post(`${environment.apiUrl}/auth/logout`, { refresh_token: rt }).subscribe();
+    }
     localStorage.removeItem(ACCESS_TOKEN_KEY);
     localStorage.removeItem(REFRESH_TOKEN_KEY);
     localStorage.removeItem(AUTH_USER_KEY);
