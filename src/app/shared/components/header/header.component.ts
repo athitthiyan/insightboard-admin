@@ -1,7 +1,9 @@
 import { CommonModule } from '@angular/common';
 import { Component, EventEmitter, HostListener, OnDestroy, Output, computed, inject, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
+import { Subject, takeUntil } from 'rxjs';
 import { AuthService } from '../../../core/services/auth.service';
+import { PlatformSyncService } from '../../../core/services/platform-sync.service';
 import { environment } from '../../../../environments/environment';
 
 interface AdminNotification {
@@ -368,6 +370,8 @@ interface AdminNotification {
 export class HeaderComponent implements OnDestroy {
   private auth = inject(AuthService);
   private http = inject(HttpClient);
+  private platformSync = inject(PlatformSyncService);
+  private destroy$ = new Subject<void>();
 
   @Output() menuToggle = new EventEmitter<void>();
 
@@ -403,12 +407,34 @@ export class HeaderComponent implements OnDestroy {
       }),
     );
     this.loadNotifications();
+    this.initRealtimeNotifications();
     // Poll every 30s for new notifications
     this.pollInterval = setInterval(() => this.loadNotifications(), 30_000);
   }
 
   ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
     if (this.pollInterval) clearInterval(this.pollInterval);
+  }
+
+  private initRealtimeNotifications(): void {
+    this.platformSync.connect();
+    this.platformSync
+      .onAny(
+        'booking-created',
+        'booking-confirmed',
+        'booking-cancelled',
+        'payment-completed',
+        'refund-initiated',
+        'refund-completed',
+        'inventory-updated',
+        'payout-settled',
+      )
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(() => {
+        this.loadNotifications();
+      });
   }
 
   @HostListener('document:click', ['$event'])

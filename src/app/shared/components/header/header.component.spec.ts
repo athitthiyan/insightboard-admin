@@ -1,22 +1,42 @@
 import { TestBed } from '@angular/core/testing';
 import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
+import { Subject } from 'rxjs';
 
 import { HeaderComponent } from './header.component';
 import { AuthService } from '../../../core/services/auth.service';
+import { PlatformSyncService } from '../../../core/services/platform-sync.service';
 
 describe('HeaderComponent', () => {
   let httpMock: HttpTestingController;
+  let platformEvents$: Subject<{
+    type:
+      | 'booking-created'
+      | 'booking-confirmed'
+      | 'booking-cancelled'
+      | 'payment-completed'
+      | 'refund-initiated'
+      | 'refund-completed'
+      | 'inventory-updated'
+      | 'payout-settled';
+  }>;
   const notificationsUrl = 'http://127.0.0.1:8000/notifications';
 
   const authService = {
     user: jest.fn(),
     logout: jest.fn(),
   };
+  const platformSyncService = {
+    connect: jest.fn(),
+    onAny: jest.fn(),
+  };
 
   beforeEach(async () => {
+    platformEvents$ = new Subject();
     authService.user.mockReset();
     authService.logout.mockReset();
+    platformSyncService.connect.mockReset();
+    platformSyncService.onAny.mockImplementation(() => platformEvents$.asObservable());
 
     await TestBed.configureTestingModule({
       imports: [HeaderComponent],
@@ -24,6 +44,7 @@ describe('HeaderComponent', () => {
         provideHttpClient(),
         provideHttpClientTesting(),
         { provide: AuthService, useValue: authService },
+        { provide: PlatformSyncService, useValue: platformSyncService },
       ],
     }).compileComponents();
 
@@ -31,6 +52,7 @@ describe('HeaderComponent', () => {
   });
 
   afterEach(() => {
+    platformEvents$.complete();
     jest.useRealTimers();
     jest.restoreAllMocks();
     httpMock.verify();
@@ -41,7 +63,6 @@ describe('HeaderComponent', () => {
     httpMock.expectOne(notificationsUrl).flush({ notifications: [] });
     return fixture;
   }
-
   it('derives display name, role, and initials from the current user', () => {
     authService.user.mockReturnValue({
       full_name: 'Admin Person',
@@ -160,6 +181,28 @@ describe('HeaderComponent', () => {
     const outside = document.createElement('div');
     component.onDocClick({ target: outside } as unknown as MouseEvent);
     expect(component.notifOpen()).toBe(false);
+  });
+
+  it('refreshes notifications immediately when a realtime platform event arrives', () => {
+    authService.user.mockReturnValue({
+      full_name: 'Admin Person',
+      is_admin: true,
+    });
+
+    const fixture = createComponent();
+    const component = fixture.componentInstance;
+
+    platformEvents$.next({ type: 'refund-initiated' });
+
+    httpMock.expectOne(notificationsUrl).flush({
+      notifications: [
+        { id: 77, type: 'refund', title: 'Refund Started', message: 'A refund entered processing.', read: false, created_at: new Date().toISOString() },
+      ],
+    });
+
+    expect(platformSyncService.connect).toHaveBeenCalled();
+    expect(component.notifications()).toHaveLength(1);
+    expect(component.notifications()[0].id).toBe(77);
   });
 
   it('keeps the panel open for clicks inside the panel or bell trigger', () => {
