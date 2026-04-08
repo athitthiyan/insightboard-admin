@@ -67,4 +67,35 @@ describe('IncidentsComponent', () => {
     expect(fixture.nativeElement.textContent).toContain('No active hold incidents.');
     httpMock.verify();
   });
+
+  it('reloads incidents after failed recovery actions too', () => {
+    const fixture = TestBed.createComponent(IncidentsComponent);
+    const component = fixture.componentInstance;
+    const httpMock = TestBed.inject(HttpTestingController);
+
+    fixture.detectChanges();
+    httpMock.expectOne(`${environment.apiUrl}/ops/incidents`).flush({
+      orphan_paid_bookings: [],
+      stale_processing_bookings: [],
+      active_holds: [],
+    });
+
+    component.forceConfirm(1);
+    httpMock.expectOne(`${environment.apiUrl}/ops/bookings/1/force-confirm`).flush({}, { status: 500, statusText: 'Error' });
+    httpMock.expectOne(`${environment.apiUrl}/ops/incidents`).flush({
+      orphan_paid_bookings: [],
+      stale_processing_bookings: [],
+      active_holds: [],
+    });
+
+    component.releaseHold(2);
+    httpMock.expectOne(`${environment.apiUrl}/ops/bookings/2/release-hold`).flush({}, { status: 500, statusText: 'Error' });
+    httpMock.expectOne(`${environment.apiUrl}/ops/incidents`).flush({
+      orphan_paid_bookings: [],
+      stale_processing_bookings: [],
+      active_holds: [],
+    });
+
+    httpMock.verify();
+  });
 });

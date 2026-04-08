@@ -127,7 +127,7 @@ describe('DashboardComponent', () => {
     expect(component.totalRevenue()).toBe(3000);
     expect(component.kpiCards()).toHaveLength(8);
     expect(component.kpiCards()[0].value).toBe('1,200');
-    expect(component.kpiCards()[1].value).toBe('$456.0k');
+    expect(component.kpiCards()[1].value).toBe('₹456.0k');
     expect(component.recentBookings()).toHaveLength(1);
     expect(component.getStatusBadge('confirmed')).toBe('badge--success');
     expect(component.getStatusBadge('unknown')).toBe('');
@@ -139,7 +139,7 @@ describe('DashboardComponent', () => {
 
   it('falls back to an empty recent bookings list when the response omits bookings', async () => {
     jest.useFakeTimers();
-    analyticsService.getRecentBookings.mockReturnValueOnce(of({ bookings: [], total: 0 }));
+    analyticsService.getRecentBookings.mockReturnValueOnce(of({ total: 0 } as RecentBookingsResponse));
 
     const fixture = TestBed.createComponent(DashboardComponent);
     const component = fixture.componentInstance;
@@ -151,6 +151,20 @@ describe('DashboardComponent', () => {
     await jest.advanceTimersByTimeAsync(100);
 
     expect(component.recentBookings()).toEqual([]);
+    jest.useRealTimers();
+  });
+
+  it('handles render paths when one or more chart refs are missing', async () => {
+    jest.useFakeTimers();
+
+    const fixture = TestBed.createComponent(DashboardComponent);
+    const component = fixture.componentInstance;
+    component.revenueChartRef = createCanvasRef();
+
+    component.ngOnInit();
+    await jest.advanceTimersByTimeAsync(100);
+
+    expect(chartInstances).toHaveLength(1);
     jest.useRealTimers();
   });
 
@@ -175,6 +189,7 @@ describe('DashboardComponent', () => {
     };
     const revenueDataset = revenueConfig.data.datasets[0];
     const revenueLabel = revenueConfig.options.plugins.tooltip.callbacks.label({ raw: 1234 });
+    const revenueFallbackLabel = revenueConfig.options.plugins.tooltip.callbacks.label({ raw: undefined as unknown as number });
     const revenueTick = revenueConfig.options.scales.y.ticks.callback(4321);
     const revenueGradient = revenueDataset.backgroundColor({
       chart: {
@@ -191,11 +206,14 @@ describe('DashboardComponent', () => {
       options: { plugins: { tooltip: { callbacks: { label: (input: { raw: number }) => string } } } };
     };
     const bookingsLabel = bookingsConfig.options.plugins.tooltip.callbacks.label({ raw: 7 });
+    const bookingsFallbackLabel = bookingsConfig.options.plugins.tooltip.callbacks.label({ raw: undefined as unknown as number });
 
-    expect(revenueLabel).toBe(' $1,234');
-    expect(revenueTick).toBe('$4,321');
+    expect(revenueLabel).toBe(' ₹1,234');
+    expect(revenueFallbackLabel).toBe(' ₹0');
+    expect(revenueTick).toBe('₹4,321');
     expect(revenueGradient.addColorStop).toHaveBeenCalledTimes(2);
     expect(bookingsLabel).toBe(' 7 bookings');
+    expect(bookingsFallbackLabel).toBe(' 0 bookings');
 
     jest.useRealTimers();
   });

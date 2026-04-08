@@ -3,7 +3,7 @@
   "version": 1,
   "newProjectRoot": "projects",
   "projects": {
-    "insightboard-admin-dashboard": {
+    "stayvora-admin": {
       "projectType": "application",
       "schematics": {
         "@schematics/angular:component": {
@@ -18,7 +18,7 @@
         "build": {
           "builder": "@angular-devkit/build-angular:application",
           "options": {
-            "outputPath": "dist/insightboard-admin-dashboard",
+            "outputPath": "dist/stayvora-admin",
             "index": "src/index.html",
             "browser": "src/main.ts",
             "polyfills": [
@@ -62,10 +62,10 @@
           "builder": "@angular-devkit/build-angular:dev-server",
           "configurations": {
             "production": {
-              "buildTarget": "insightboard-admin-dashboard:build:production"
+              "buildTarget": "stayvora-admin:build:production"
             },
             "development": {
-              "buildTarget": "insightboard-admin-dashboard:build:development"
+              "buildTarget": "stayvora-admin:build:development"
             }
           },
           "defaultConfiguration": "development"

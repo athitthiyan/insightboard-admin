@@ -98,7 +98,7 @@ interface RefundActionResponse {
               <td data-label="Ref"><span class="mono-text">{{ t.transaction_ref }}</span></td>
               <td data-label="Guest">{{ t.booking?.user_name || '—' }}</td>
               <td data-label="Hotel">{{ t.booking?.room?.hotel_name || '—' }}</td>
-              <td data-label="Amount"><strong class="amount">\${{ t.amount | number:'1.2-2' }}</strong></td>
+              <td data-label="Amount"><strong class="amount">₹{{ t.amount | number:'1.2-2' }}</strong></td>
               <td data-label="Method">{{ t.card_brand || t.payment_method }} @if (t.card_last4) { ••{{ t.card_last4 }} }</td>
               <td data-label="Status">
                 <span class="badge" [class]="getBadge(t.status)">{{ t.status }}</span>
@@ -110,7 +110,7 @@ interface RefundActionResponse {
               <td data-label="Actions">
                 <div class="row-actions">
                   @if (canForceInitiateRefund(t)) {
-                    <button class="action-link" type="button" (click)="forceInitiateRefund(t)">Force initiate</button>
+                    <button class="action-link" type="button" (click)="openRefundDialog(t)">Force initiate</button>
                   }
                   @if (canRetryRefund(t)) {
                     <button class="action-link" type="button" (click)="retryRefund(t)">Retry failed</button>
@@ -135,6 +135,49 @@ interface RefundActionResponse {
     @if (actionError()) {
       <p class="action-feedback action-feedback--error">{{ actionError() }}</p>
     }
+
+    <!-- Refund Confirmation Dialog -->
+    @if (refundDialogOpen()) {
+      <div
+        class="refund-dialog-overlay"
+        tabindex="0"
+        (click)="closeRefundDialog()"
+        (keydown.enter)="closeRefundDialog()"
+        (keydown.space)="closeRefundDialog()"
+      >
+        <div
+          class="refund-dialog"
+          tabindex="0"
+          (click)="$event.stopPropagation()"
+          (keydown.enter)="$event.stopPropagation()"
+          (keydown.space)="$event.stopPropagation()"
+        >
+          <h3>Confirm Force Refund</h3>
+          <p>You are about to force-initiate a refund for transaction <strong>{{ refundDialogTxn()?.transaction_ref }}</strong>.</p>
+          <div class="refund-dialog__details">
+            <div class="refund-dialog__row">
+              <span>Booking</span>
+              <strong>{{ refundDialogTxn()?.booking?.user_name || '—' }}</strong>
+            </div>
+            <div class="refund-dialog__row">
+              <span>Amount</span>
+              <strong>₹{{ refundDialogTxn()?.amount | number:'1.2-2' }}</strong>
+            </div>
+            <div class="refund-dialog__row">
+              <span>Payment method</span>
+              <strong>{{ refundDialogTxn()?.payment_method }}</strong>
+            </div>
+          </div>
+          <div class="refund-dialog__warning">
+            This action is irreversible and will immediately initiate a refund to the customer's original payment method.
+          </div>
+          <div class="refund-dialog__actions">
+            <button type="button" class="refund-dialog__cancel" (click)="closeRefundDialog()">Cancel</button>
+            <button type="button" class="refund-dialog__confirm" (click)="confirmForceRefund()">Force Initiate Refund</button>
+          </div>
+        </div>
+      </div>
+    }
   `,
   styles: [`
     .txn-summary {
@@ -150,26 +193,26 @@ interface RefundActionResponse {
       align-items: center;
       gap: 14px;
       padding: 16px 18px;
-      background: var(--ib-surface);
-      border: 1px solid var(--ib-border);
+      background: var(--sv-surface);
+      border: 1px solid var(--sv-border);
       border-radius: 14px;
       transition: all 0.2s;
     }
 
     .summary-card:hover {
-      border-color: var(--ib-border-2);
+      border-color: var(--sv-border-2);
     }
 
     .summary-card strong {
       display: block;
       font-size: 1.4rem;
       font-weight: 800;
-      color: var(--ib-text);
+      color: var(--sv-text);
     }
 
     .summary-card span {
       font-size: 12px;
-      color: var(--ib-text-muted);
+      color: var(--sv-text-muted);
     }
 
     .summary-card__icon {
@@ -190,8 +233,8 @@ interface RefundActionResponse {
     }
 
     .data-table-wrap {
-      background: var(--ib-surface);
-      border: 1px solid var(--ib-border);
+      background: var(--sv-surface);
+      border: 1px solid var(--sv-border);
       border-radius: 16px;
       overflow: auto;
       animation: fadeInUp 0.5s ease 0.1s both;
@@ -210,16 +253,16 @@ interface RefundActionResponse {
       font-weight: 700;
       text-transform: uppercase;
       letter-spacing: 1px;
-      color: var(--ib-primary-light);
-      border-bottom: 1px solid var(--ib-border);
+      color: var(--sv-primary-light);
+      border-bottom: 1px solid var(--sv-border);
       background: rgba(99, 102, 241, 0.03);
     }
 
     .data-table td {
       padding: 14px 16px;
       font-size: 13px;
-      color: var(--ib-text-muted);
-      border-bottom: 1px solid var(--ib-border);
+      color: var(--sv-text-muted);
+      border-bottom: 1px solid var(--sv-border);
       vertical-align: middle;
     }
 
@@ -237,7 +280,7 @@ interface RefundActionResponse {
     }
 
     .amount {
-      color: var(--ib-text) !important;
+      color: var(--sv-text) !important;
       font-size: 14px !important;
       font-weight: 700 !important;
     }
@@ -257,9 +300,9 @@ interface RefundActionResponse {
 
     .action-link {
       background: transparent;
-      border: 1px solid var(--ib-border);
+      border: 1px solid var(--sv-border);
       border-radius: 999px;
-      color: var(--ib-text);
+      color: var(--sv-text);
       cursor: pointer;
       font-size: 11px;
       padding: 4px 8px;
@@ -272,6 +315,70 @@ interface RefundActionResponse {
 
     .action-feedback--success { color: #22c55e; }
     .action-feedback--error { color: #ef4444; }
+
+    /* ── Refund Confirmation Dialog ── */
+    .refund-dialog-overlay {
+      position: fixed; inset: 0; z-index: 9999;
+      background: rgba(2, 6, 23, 0.8);
+      display: flex; align-items: center; justify-content: center;
+      animation: fadeIn 0.15s ease;
+    }
+    .refund-dialog {
+      background: var(--sv-bg-2, #0d1321);
+      border: 1px solid var(--sv-border, rgba(255,255,255,0.1));
+      border-radius: 20px;
+      padding: 28px;
+      max-width: 480px;
+      width: calc(100% - 32px);
+      box-shadow: 0 24px 60px rgba(0,0,0,0.5);
+      animation: dialogSlideIn 0.2s ease;
+    }
+    @keyframes dialogSlideIn {
+      from { opacity: 0; transform: scale(0.96) translateY(8px); }
+      to { opacity: 1; transform: none; }
+    }
+    .refund-dialog h3 {
+      font-size: 1.15rem; color: var(--sv-text, #f0f4ff); margin: 0 0 8px;
+    }
+    .refund-dialog > p {
+      color: var(--sv-text-muted, #8a9bbf); font-size: 0.88rem; margin: 0 0 16px;
+    }
+    .refund-dialog__details {
+      display: grid; gap: 8px;
+      padding: 14px; border-radius: 14px;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid var(--sv-border, rgba(255,255,255,0.06));
+      margin-bottom: 14px;
+    }
+    .refund-dialog__row {
+      display: flex; justify-content: space-between;
+      font-size: 0.85rem;
+    }
+    .refund-dialog__row span { color: var(--sv-text-muted, #8a9bbf); }
+    .refund-dialog__row strong { color: var(--sv-text, #f0f4ff); }
+    .refund-dialog__warning {
+      padding: 10px 14px; border-radius: 12px;
+      background: rgba(239, 68, 68, 0.08);
+      border: 1px solid rgba(239, 68, 68, 0.2);
+      color: #fca5a5; font-size: 0.82rem; line-height: 1.5;
+      margin-bottom: 20px;
+    }
+    .refund-dialog__actions {
+      display: flex; gap: 12px; justify-content: flex-end;
+    }
+    .refund-dialog__cancel {
+      padding: 10px 20px; border-radius: 12px;
+      border: 1px solid var(--sv-border, rgba(255,255,255,0.08));
+      background: transparent; color: var(--sv-text, #f0f4ff);
+      cursor: pointer; font-weight: 600;
+    }
+    .refund-dialog__confirm {
+      padding: 10px 20px; border-radius: 12px; border: none;
+      background: linear-gradient(135deg, #ef4444, #dc2626);
+      color: white; font-weight: 700; cursor: pointer;
+    }
+    .refund-dialog__confirm:hover { opacity: 0.9; }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
     @media (max-width: 767px) {
       .data-table,
@@ -302,7 +409,7 @@ interface RefundActionResponse {
       }
 
       .data-row {
-        border: 1px solid var(--ib-border);
+        border: 1px solid var(--sv-border);
         border-radius: 14px;
         padding: 12px 14px;
         background: rgba(255, 255, 255, 0.015);
@@ -320,12 +427,26 @@ interface RefundActionResponse {
         font-weight: 700;
         letter-spacing: 0.08em;
         text-transform: uppercase;
-        color: var(--ib-primary-light);
+        color: var(--sv-primary-light);
         margin-bottom: 4px;
       }
     }
 
-    @media (min-width: 768px) {
+    /* Tablet (768–900px) */
+    @media (min-width: 768px) and (max-width: 900px) {
+      .txn-summary {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 12px;
+        margin-bottom: 20px;
+      }
+
+      .table-toolbar__select {
+        width: 160px;
+      }
+    }
+
+    /* Desktop (>900px) */
+    @media (min-width: 901px) {
       .txn-summary {
         grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
         gap: 16px;
@@ -374,7 +495,7 @@ export class TransactionsComponent implements OnInit {
         const rev = txns
           .filter(t => t.status === 'success')
           .reduce((sum, txn) => sum + txn.amount, 0);
-        this.summaryCards[3].value = `$${rev.toLocaleString('en-US', { maximumFractionDigits: 0 })}`;
+        this.summaryCards[3].value = `₹${rev.toLocaleString('en-IN', { maximumFractionDigits: 0 })}`;
       },
       error: () => {
         this.transactions.set([
@@ -382,7 +503,7 @@ export class TransactionsComponent implements OnInit {
             id: 1,
             transaction_ref: 'TXN-ABC12345',
             amount: 987.5,
-            currency: 'USD',
+            currency: 'INR',
             payment_method: 'card',
             card_last4: '4242',
             card_brand: 'Visa',
@@ -394,7 +515,7 @@ export class TransactionsComponent implements OnInit {
             id: 2,
             transaction_ref: 'TXN-DEF67890',
             amount: 504,
-            currency: 'USD',
+            currency: 'INR',
             payment_method: 'card',
             card_last4: '5555',
             card_brand: 'Mastercard',
@@ -406,7 +527,7 @@ export class TransactionsComponent implements OnInit {
             id: 3,
             transaction_ref: 'TXN-GHI11223',
             amount: 336,
-            currency: 'USD',
+            currency: 'INR',
             payment_method: 'card',
             card_last4: '0002',
             card_brand: 'Visa',
@@ -446,6 +567,28 @@ export class TransactionsComponent implements OnInit {
 
   canReverseRefund(transaction: TransactionRow): boolean {
     return transaction.booking?.refund_status === 'refund_success';
+  }
+
+  // ── Refund Dialog ─────────────────────────────────────────────────
+  refundDialogOpen = signal(false);
+  refundDialogTxn = signal<TransactionRow | null>(null);
+
+  openRefundDialog(transaction: TransactionRow): void {
+    this.refundDialogTxn.set(transaction);
+    this.refundDialogOpen.set(true);
+  }
+
+  closeRefundDialog(): void {
+    this.refundDialogOpen.set(false);
+    this.refundDialogTxn.set(null);
+  }
+
+  confirmForceRefund(): void {
+    const txn = this.refundDialogTxn();
+    if (txn) {
+      this.forceInitiateRefund(txn);
+    }
+    this.closeRefundDialog();
   }
 
   forceInitiateRefund(transaction: TransactionRow): void {

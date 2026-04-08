@@ -39,6 +39,10 @@ export interface RecentBooking {
   check_out?: string;
   nights?: number;
   total_amount: number;
+  guests?: number;
+  adults?: number;
+  children?: number;
+  infants?: number;
   room?: {
     hotel_name: string;
     room_type: string;

@@ -80,7 +80,7 @@ describe('TransactionsComponent', () => {
     expect(component.summaryCards[0].value).toBe('0');
     expect(component.summaryCards[1].value).toBe('0');
     expect(component.summaryCards[2].value).toBe('0');
-    expect(component.summaryCards[3].value).toBe('$0');
+    expect(component.summaryCards[3].value).toBe('₹0');
   });
 
   it('falls back to mock data on HTTP error', async () => {
@@ -205,5 +205,43 @@ describe('TransactionsComponent', () => {
       .expectOne(`${environment.apiUrl}/payments/refunds/101/initiate`)
       .flush({}, { status: 500, statusText: 'Error' });
     expect(component.actionError()).toBe('We could not update the refund workflow right now.');
+  });
+
+  it('opens, closes, and confirms the refund dialog', async () => {
+    await setup();
+    const fixture = TestBed.createComponent(TransactionsComponent);
+    const component = fixture.componentInstance;
+    component.ngOnInit();
+    httpMock.expectOne(r => r.url === BASE_URL).flush({ transactions: sampleTransactions, total: 3 });
+
+    component.openRefundDialog(sampleTransactions[0] as never);
+    expect(component.refundDialogOpen()).toBe(true);
+    expect(component.refundDialogTxn()?.transaction_ref).toBe('TXN-001');
+
+    component.closeRefundDialog();
+    expect(component.refundDialogOpen()).toBe(false);
+    expect(component.refundDialogTxn()).toBeNull();
+
+    component.openRefundDialog(sampleTransactions[0] as never);
+    component.confirmForceRefund();
+    httpMock
+      .expectOne(`${environment.apiUrl}/payments/refunds/101/initiate`)
+      .flush({ timeline: { refund_status: 'refund_initiated' } });
+
+    expect(component.refundDialogOpen()).toBe(false);
+    expect(component.refundDialogTxn()).toBeNull();
+  });
+
+  it('safely handles confirmForceRefund when no dialog transaction exists', async () => {
+    await setup();
+    const fixture = TestBed.createComponent(TransactionsComponent);
+    const component = fixture.componentInstance;
+    component.ngOnInit();
+    httpMock.expectOne(r => r.url === BASE_URL).flush({ transactions: [], total: 0 });
+
+    component.confirmForceRefund();
+
+    expect(component.refundDialogOpen()).toBe(false);
+    expect(component.refundDialogTxn()).toBeNull();
   });
 });

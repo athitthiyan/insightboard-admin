@@ -60,7 +60,7 @@ interface KPICard {
             </div>
             <div class="chart-card__total">
               <span>Total</span>
-              <strong>\${{ totalRevenue() | number:'1.0-0' }}</strong>
+              <strong>₹{{ totalRevenue() | number:'1.0-0' }}</strong>
             </div>
           </div>
           <div class="chart-card__body">
@@ -145,7 +145,7 @@ interface KPICard {
                       </div>
                     </td>
                     <td data-label="Check-in">{{ b.check_in | date:'MMM d' }}</td>
-                    <td data-label="Amount"><strong class="amount">\${{ b.total_amount | number:'1.0-0' }}</strong></td>
+                    <td data-label="Amount"><strong class="amount">₹{{ b.total_amount | number:'1.0-0' }}</strong></td>
                     <td data-label="Status"><span class="badge" [class]="getStatusBadge(b.status)">{{ b.status }}</span></td>
                   </tr>
                 }
@@ -162,7 +162,7 @@ interface KPICard {
             <div class="room-type-bar">
               <div class="room-type-bar__info">
                 <span>{{ rt.room_type | titlecase }}</span>
-                <strong>\${{ rt.revenue | number:'1.0-0' }}</strong>
+                <strong>₹{{ rt.revenue | number:'1.0-0' }}</strong>
               </div>
               <div class="room-type-bar__track">
                 <div class="room-type-bar__fill" [style]="'width: ' + getBarWidth(rt.revenue) + '%'"></div>
@@ -189,8 +189,8 @@ interface KPICard {
     }
 
     .kpi-card {
-      background: var(--ib-surface);
-      border: 1px solid var(--ib-border);
+      background: var(--sv-surface);
+      border: 1px solid var(--sv-border);
       border-radius: 16px;
       padding: 20px;
       animation: fadeInUp 0.5s ease both;
@@ -198,9 +198,9 @@ interface KPICard {
     }
 
     .kpi-card:hover {
-      border-color: var(--ib-border-2);
+      border-color: var(--sv-border-2);
       transform: translateY(-3px);
-      box-shadow: var(--ib-shadow);
+      box-shadow: var(--sv-shadow);
     }
 
     .kpi-card__header {
@@ -240,7 +240,7 @@ interface KPICard {
     .kpi-card__value {
       font-size: 1.9rem;
       font-weight: 800;
-      color: var(--ib-text);
+      color: var(--sv-text);
       line-height: 1;
       margin-bottom: 6px;
       animation: countUp 0.5s ease both;
@@ -249,7 +249,7 @@ interface KPICard {
 
     .kpi-card__label {
       font-size: 13px;
-      color: var(--ib-text-muted);
+      color: var(--sv-text-muted);
     }
 
     .charts-row,
@@ -260,8 +260,8 @@ interface KPICard {
     }
 
     .chart-card {
-      background: var(--ib-surface);
-      border: 1px solid var(--ib-border);
+      background: var(--sv-surface);
+      border: 1px solid var(--sv-border);
       border-radius: 16px;
       padding: 16px;
       animation: fadeInUp 0.5s ease 0.2s both;
@@ -278,12 +278,12 @@ interface KPICard {
       flex-wrap: wrap;
     }
 
-    .chart-card__header h3 { font-size: 16px; font-weight: 700; color: var(--ib-text); }
-    .chart-card__header p { font-size: 12px; color: var(--ib-text-muted); margin-top: 3px; }
+    .chart-card__header h3 { font-size: 16px; font-weight: 700; color: var(--sv-text); }
+    .chart-card__header p { font-size: 12px; color: var(--sv-text-muted); margin-top: 3px; }
 
     .chart-card__total { text-align: right; }
-    .chart-card__total span { display: block; font-size: 11px; color: var(--ib-text-muted); }
-    .chart-card__total strong { font-size: 1.2rem; font-weight: 800; color: var(--ib-primary-light); }
+    .chart-card__total span { display: block; font-size: 11px; color: var(--sv-text-muted); }
+    .chart-card__total strong { font-size: 1.2rem; font-weight: 800; color: var(--sv-primary-light); }
 
     .chart-card__body {
       position: relative;
@@ -306,8 +306,8 @@ interface KPICard {
       pointer-events: none;
     }
 
-    .donut-center strong { display: block; font-size: 1.6rem; font-weight: 800; color: var(--ib-text); }
-    .donut-center span { font-size: 11px; color: var(--ib-text-muted); }
+    .donut-center strong { display: block; font-size: 1.6rem; font-weight: 800; color: var(--sv-text); }
+    .donut-center span { font-size: 11px; color: var(--sv-text-muted); }
 
     .chart-legend {
       margin-top: 16px;
@@ -321,7 +321,7 @@ interface KPICard {
       align-items: center;
       gap: 8px;
       font-size: 13px;
-      color: var(--ib-text-muted);
+      color: var(--sv-text-muted);
     }
 
     .chart-legend__dot {
@@ -334,7 +334,7 @@ interface KPICard {
     .chart-legend__pct {
       margin-left: auto;
       font-weight: 600;
-      color: var(--ib-text);
+      color: var(--sv-text);
     }
 
     .dot--success { background: #22c55e; }
@@ -356,21 +356,21 @@ interface KPICard {
       font-weight: 700;
       text-transform: uppercase;
       letter-spacing: 1px;
-      color: var(--ib-primary-light);
-      border-bottom: 1px solid var(--ib-border);
+      color: var(--sv-primary-light);
+      border-bottom: 1px solid var(--sv-border);
     }
 
     .recent-table td {
       padding: 14px;
       font-size: 13px;
-      color: var(--ib-text-muted);
-      border-bottom: 1px solid var(--ib-border);
+      color: var(--sv-text-muted);
+      border-bottom: 1px solid var(--sv-border);
       vertical-align: middle;
     }
 
     .recent-table td strong {
       display: block;
-      color: var(--ib-text);
+      color: var(--sv-text);
       font-size: 13px;
     }
 
@@ -388,13 +388,13 @@ interface KPICard {
       width: 32px;
       height: 32px;
       border-radius: 8px;
-      background: linear-gradient(135deg, var(--ib-primary), var(--ib-primary-dark));
+      background: var(--sv-gradient-gold);
       display: flex;
       align-items: center;
       justify-content: center;
       font-size: 14px;
       font-weight: 700;
-      color: white;
+      color: #0a0f1e;
       flex-shrink: 0;
     }
 
@@ -403,14 +403,14 @@ interface KPICard {
       font-size: 10px;
       font-weight: 700;
       text-transform: capitalize;
-      background: rgba(99, 102, 241, 0.1);
-      color: var(--ib-primary-light);
+      background: rgba(214, 184, 107, 0.1);
+      color: var(--sv-gold-light);
       padding: 2px 6px;
       border-radius: 4px;
       margin-top: 2px;
     }
 
-    .amount { color: var(--ib-text) !important; font-size: 14px !important; }
+    .amount { color: var(--sv-text) !important; font-size: 14px !important; }
 
     .room-type-bar { margin-bottom: 20px; }
 
@@ -420,26 +420,26 @@ interface KPICard {
       margin-bottom: 6px;
     }
 
-    .room-type-bar__info span { font-size: 13px; color: var(--ib-text-muted); }
-    .room-type-bar__info strong { font-size: 13px; color: var(--ib-text); font-weight: 700; }
+    .room-type-bar__info span { font-size: 13px; color: var(--sv-text-muted); }
+    .room-type-bar__info strong { font-size: 13px; color: var(--sv-text); font-weight: 700; }
 
     .room-type-bar__track {
       height: 8px;
-      background: var(--ib-surface-2);
+      background: var(--sv-surface-2);
       border-radius: 99px;
       overflow: hidden;
     }
 
     .room-type-bar__fill {
       height: 100%;
-      background: linear-gradient(90deg, var(--ib-primary), var(--ib-accent));
+      background: linear-gradient(90deg, var(--sv-primary), var(--sv-accent));
       border-radius: 99px;
       transition: width 1s ease;
     }
 
     .room-type-bar__count {
       font-size: 11px;
-      color: var(--ib-text-subtle);
+      color: var(--sv-text-subtle);
       display: block;
       margin-top: 4px;
     }
@@ -468,7 +468,7 @@ interface KPICard {
       }
 
       .recent-table tr {
-        border: 1px solid var(--ib-border);
+        border: 1px solid var(--sv-border);
         border-radius: 14px;
         padding: 14px;
         background: rgba(255, 255, 255, 0.015);
@@ -486,7 +486,7 @@ interface KPICard {
         font-weight: 700;
         letter-spacing: 0.08em;
         text-transform: uppercase;
-        color: var(--ib-primary-light);
+        color: var(--sv-primary-light);
         margin-bottom: 4px;
       }
 
@@ -506,6 +506,16 @@ interface KPICard {
       .bottom-row { gap: 24px; }
       .chart-card { padding: 24px; }
       .chart-card__body { height: 260px; }
+    }
+
+    /* Tablet (768–900px): 2-col KPI, single-col charts */
+    @media (min-width: 768px) and (max-width: 900px) {
+      .kpi-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
+      .charts-row,
+      .bottom-row { grid-template-columns: 1fr; }
+      .chart-card { padding: 18px; }
+      .chart-card__body { height: 220px; }
+      .recent-table table { min-width: 600px; }
     }
 
     @media (min-width: 1101px) {
@@ -552,11 +562,11 @@ export class DashboardComponent implements OnInit, OnDestroy {
   private buildKPICards(kpis: KPIStats) {
     this.kpiCards.set([
       { icon: 'B', label: 'Total Bookings', value: kpis.total_bookings.toLocaleString(), change: '+12.5%', positive: true, color: '#6366f1' },
-      { icon: '$', label: 'Total Revenue', value: '$' + (kpis.total_revenue / 1000).toFixed(1) + 'k', change: '+29.4%', positive: true, color: '#22c55e' },
+      { icon: '₹', label: 'Total Revenue', value: '₹' + (kpis.total_revenue / 1000).toFixed(1) + 'k', change: '+29.4%', positive: true, color: '#22c55e' },
       { icon: 'S', label: 'Success Rate', value: kpis.success_rate + '%', change: '+2.1%', positive: true, color: '#22d3ee' },
-      { icon: 'A', label: 'Avg Booking Value', value: '$' + kpis.avg_booking_value.toFixed(0), change: '-3.2%', positive: false, color: '#f59e0b' },
+      { icon: 'A', label: 'Avg Booking Value', value: '₹' + kpis.avg_booking_value.toFixed(0), change: '-3.2%', positive: false, color: '#f59e0b' },
       { icon: 'T', label: 'Bookings Today', value: String(kpis.bookings_today), change: '+7', positive: true, color: '#a78bfa' },
-      { icon: 'R', label: 'Revenue Today', value: '$' + kpis.revenue_today.toLocaleString(), change: '+$280', positive: true, color: '#34d399' },
+      { icon: 'R', label: 'Revenue Today', value: '₹' + kpis.revenue_today.toLocaleString(), change: '+₹280', positive: true, color: '#34d399' },
       { icon: 'P', label: 'Pending Bookings', value: String(kpis.pending_bookings), change: '-2', positive: true, color: '#fbbf24' },
       { icon: 'F', label: 'Failed Payments', value: String(kpis.failed_payments), change: '+1', positive: false, color: '#f87171' },
     ]);
@@ -596,7 +606,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
               borderColor: 'rgba(255,255,255,0.1)',
               borderWidth: 1,
               padding: 12,
-              callbacks: { label: context => ` $${Number(context.raw ?? 0).toLocaleString()}` },
+              callbacks: { label: context => ` ₹${Number(context.raw ?? 0).toLocaleString('en-IN')}` },
             },
           },
           scales: {
@@ -605,7 +615,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
               grid: { color: 'rgba(255,255,255,0.04)' },
               ticks: {
                 font: { size: 11 },
-                callback: value => `$${Number(value).toLocaleString()}`,
+                callback: value => `₹${Number(value).toLocaleString('en-IN')}`,
               },
             },
           },

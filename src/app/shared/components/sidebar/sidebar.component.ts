@@ -21,9 +21,9 @@ interface NavItem {
       aria-label="Admin navigation"
     >
       <div class="sidebar__logo">
-        <span class="sidebar__logo-icon">AI</span>
+        <svg class="sidebar__logo-svg" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" width="28" height="28"><rect width="32" height="32" rx="8" fill="#0f2033"/><path d="M9 20C9 15 13 12 18 12C23 12 21 15.5 16.5 17C12 18.5 10.5 21.5 15 23C19.5 24.5 23 22 23 19.5" stroke="#d6b86b" stroke-width="2.4" stroke-linecap="round" fill="none"/><circle cx="14" cy="9" r="1.6" fill="#d6b86b" opacity=".75"/></svg>
         @if (!collapsed()) {
-          <span class="sidebar__logo-text">Insight<span>Board</span></span>
+          <span class="sidebar__logo-text">Stayvora <span>Admin</span></span>
         }
 
         <button
@@ -94,8 +94,8 @@ interface NavItem {
     .sidebar {
       width: min(84vw, 320px);
       min-height: 100dvh;
-      background: var(--ib-sidebar);
-      border-right: 1px solid var(--ib-border);
+      background: var(--sv-sidebar);
+      border-right: 1px solid var(--sv-border);
       display: flex;
       flex-direction: column;
       flex-shrink: 0;
@@ -123,34 +123,33 @@ interface NavItem {
       align-items: center;
       gap: 10px;
       padding: 20px 16px;
-      border-bottom: 1px solid var(--ib-border);
+      border-bottom: 1px solid var(--sv-border);
       min-height: 64px;
     }
 
-    .sidebar__logo-icon {
-      font-size: 1rem;
-      font-weight: 700;
+    .sidebar__logo-svg {
+      width: 28px;
+      height: 28px;
       flex-shrink: 0;
-      color: var(--ib-primary-light);
     }
 
     .sidebar__logo-text {
       font-size: 1.1rem;
       font-weight: 700;
-      color: var(--ib-text);
+      color: var(--sv-text);
       white-space: nowrap;
       flex: 1;
     }
 
     .sidebar__logo-text span {
-      color: var(--ib-primary-light);
+      color: var(--sv-gold-light);
     }
 
     .sidebar__toggle {
-      background: var(--ib-surface);
-      border: 1px solid var(--ib-border);
+      background: var(--sv-surface);
+      border: 1px solid var(--sv-border);
       border-radius: 6px;
-      color: var(--ib-text-muted);
+      color: var(--sv-text-muted);
       width: 28px;
       height: 28px;
       font-size: 12px;
@@ -172,8 +171,8 @@ interface NavItem {
     }
 
     .sidebar__toggle:hover {
-      border-color: var(--ib-primary);
-      color: var(--ib-primary-light);
+      border-color: var(--sv-gold);
+      color: var(--sv-gold-light);
     }
 
     .sidebar__nav {
@@ -188,7 +187,7 @@ interface NavItem {
       font-weight: 700;
       letter-spacing: 2px;
       text-transform: uppercase;
-      color: var(--ib-text-subtle);
+      color: var(--sv-text-subtle);
       padding: 8px 10px 6px;
       height: 32px;
       display: flex;
@@ -201,7 +200,7 @@ interface NavItem {
       gap: 12px;
       padding: 10px 12px;
       border-radius: 10px;
-      color: var(--ib-text-muted);
+      color: var(--sv-text-muted);
       font-size: 14px;
       font-weight: 500;
       transition: all 0.2s;
@@ -210,23 +209,23 @@ interface NavItem {
     }
 
     .sidebar__nav-item:hover {
-      background: var(--ib-surface-2);
-      color: var(--ib-text);
+      background: var(--sv-surface-2);
+      color: var(--sv-text);
     }
 
     .sidebar__nav-item.active {
-      background: rgba(99, 102, 241, 0.12);
-      color: var(--ib-primary-light);
-      border: 1px solid rgba(99, 102, 241, 0.2);
+      background: rgba(214, 184, 107, 0.12);
+      color: var(--sv-gold-light);
+      border: 1px solid rgba(214, 184, 107, 0.2);
     }
 
     .sidebar__nav-item--ext {
-      color: var(--ib-text-subtle);
+      color: var(--sv-text-subtle);
       font-size: 13px;
     }
 
     .sidebar__nav-item--ext:hover {
-      color: var(--ib-accent);
+      color: var(--sv-accent);
     }
 
     .sidebar__nav-icon {
@@ -238,13 +237,13 @@ interface NavItem {
 
     .sidebar__divider {
       height: 1px;
-      background: var(--ib-border);
+      background: var(--sv-border);
       margin: 12px 8px;
     }
 
     .sidebar__footer {
       padding: 16px;
-      border-top: 1px solid var(--ib-border);
+      border-top: 1px solid var(--sv-border);
     }
 
     .sidebar__status {
@@ -252,7 +251,7 @@ interface NavItem {
       align-items: center;
       gap: 8px;
       font-size: 12px;
-      color: var(--ib-text-muted);
+      color: var(--sv-text-muted);
       margin-bottom: 8px;
     }
 
@@ -267,7 +266,7 @@ interface NavItem {
 
     .sidebar p {
       font-size: 11px;
-      color: var(--ib-text-subtle);
+      color: var(--sv-text-subtle);
     }
 
     @media (max-width: 768px) {
@@ -310,7 +309,7 @@ export class SidebarComponent {
 
   portfolioLinks = [
     { icon: 'S', label: 'Stayvora', url: environment.bookingAppUrl },
-    { icon: 'P', label: 'PayFlow', url: environment.paymentAppUrl },
+    { icon: 'P', label: 'Stayvora Pay', url: environment.paymentAppUrl },
   ];
 
   toggleCollapsed() {

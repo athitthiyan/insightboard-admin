@@ -1,7 +1,7 @@
 {
-  "name": "insightboard-admin-dashboard",
+  "name": "stayvora-admin",
   "version": "1.0.0",
-  "description": "InsightBoard — Hotel Analytics Admin Dashboard",
+  "description": "Stayvora Admin — Executive Hotel Analytics Dashboard",
   "scripts": {
     "ng": "ng",
     "start": "ng serve --port 4202",

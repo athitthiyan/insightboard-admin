@@ -97,4 +97,18 @@ describe('authInterceptor', () => {
     expect(auth.logout).not.toHaveBeenCalled();
     expect(router.navigate).not.toHaveBeenCalled();
   });
+
+  it('logs out immediately for unauthorized requests without a refresh token', () => {
+    auth.accessToken.mockReturnValue('token');
+    auth.refreshToken.mockReturnValue(null);
+
+    http.get('/secure').subscribe({ error: () => undefined });
+
+    const req = httpMock.expectOne('/secure');
+    req.flush({ detail: 'Unauthorized' }, { status: 401, statusText: 'Unauthorized' });
+
+    expect(auth.refreshToken$).not.toHaveBeenCalled();
+    expect(auth.logout).toHaveBeenCalledWith(false);
+    expect(router.navigate).toHaveBeenCalledWith(['/login']);
+  });
 });

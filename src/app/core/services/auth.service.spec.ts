@@ -60,7 +60,7 @@ describe('AuthService', () => {
     expect(service.refreshToken()).toBe('refresh-token');
     expect(service.isAuthenticated()).toBe(true);
     expect(service.isAdmin()).toBe(true);
-    expect(localStorage.getItem('insightboard_access_token')).toBe('access-token');
+    expect(localStorage.getItem('stayvora_admin_access_token')).toBe('access-token');
   });
 
   it('clears auth state, calls logout endpoint, and redirects on logout by default', async () => {
@@ -78,15 +78,47 @@ describe('AuthService', () => {
 
     expect(service.accessToken()).toBeNull();
     expect(service.user()).toBeNull();
-    expect(localStorage.getItem('insightboard_access_token')).toBeNull();
+    expect(localStorage.getItem('stayvora_admin_access_token')).toBeNull();
     expect(router.navigate).toHaveBeenCalledWith(['/login']);
+  });
+
+  it('refreshes tokens and keeps the user in sync', () => {
+    service.login('admin@example.com', 'AdminPass123').subscribe();
+    httpMock.expectOne(`${environment.apiUrl}/auth/login`).flush(authResponse);
+
+    service.refreshToken$().subscribe(response => {
+      expect(response.access_token).toBe('fresh-access');
+    });
+
+    const refreshReq = httpMock.expectOne(`${environment.apiUrl}/auth/refresh`);
+    expect(refreshReq.request.method).toBe('POST');
+    expect(refreshReq.request.body).toEqual({ refresh_token: 'refresh-token' });
+    refreshReq.flush({
+      ...authResponse,
+      access_token: 'fresh-access',
+      refresh_token: 'fresh-refresh',
+    });
+
+    expect(service.accessToken()).toBe('fresh-access');
+    expect(service.refreshToken()).toBe('fresh-refresh');
+    expect(localStorage.getItem('stayvora_admin_access_token')).toBe('fresh-access');
+  });
+
+  it('skips navigation when logout is requested without redirect and there is no refresh token', async () => {
+    jest.spyOn(router, 'navigate').mockResolvedValue(true);
+
+    service.logout(false);
+
+    expect(service.accessToken()).toBeNull();
+    expect(service.user()).toBeNull();
+    expect(router.navigate).not.toHaveBeenCalled();
   });
 
   it('restores the current user when a token exists', () => {
     TestBed.resetTestingModule();
-    localStorage.setItem('insightboard_access_token', 'stored-access');
-    localStorage.setItem('insightboard_refresh_token', 'stored-refresh');
-    localStorage.setItem('insightboard_auth_user', JSON.stringify(authResponse.user));
+    localStorage.setItem('stayvora_admin_access_token', 'stored-access');
+    localStorage.setItem('stayvora_admin_refresh_token', 'stored-refresh');
+    localStorage.setItem('stayvora_admin_auth_user', JSON.stringify(authResponse.user));
 
     configureTestingModule();
     service.restoreSession()?.subscribe(user => {
@@ -104,13 +136,25 @@ describe('AuthService', () => {
     expect(service.restoreSession()).toBeNull();
   });
 
+  it('restores the user in storage after restoreSession succeeds', () => {
+    TestBed.resetTestingModule();
+    localStorage.setItem('stayvora_admin_access_token', 'stored-access');
+
+    configureTestingModule();
+    service.restoreSession()?.subscribe();
+
+    httpMock.expectOne(`${environment.apiUrl}/auth/me`).flush(authResponse.user);
+
+    expect(localStorage.getItem('stayvora_admin_auth_user')).toBe(JSON.stringify(authResponse.user));
+  });
+
   it('drops malformed stored user payloads', () => {
     TestBed.resetTestingModule();
-    localStorage.setItem('insightboard_auth_user', '{bad json');
+    localStorage.setItem('stayvora_admin_auth_user', '{bad json');
 
     configureTestingModule();
 
     expect(service.user()).toBeNull();
-    expect(localStorage.getItem('insightboard_auth_user')).toBeNull();
+    expect(localStorage.getItem('stayvora_admin_auth_user')).toBeNull();
   });
 });

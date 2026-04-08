@@ -19,9 +19,9 @@ export interface AuthResponse {
   user: AuthUser;
 }
 
-const ACCESS_TOKEN_KEY = 'insightboard_access_token';
-const REFRESH_TOKEN_KEY = 'insightboard_refresh_token';
-const AUTH_USER_KEY = 'insightboard_auth_user';
+const ACCESS_TOKEN_KEY = 'stayvora_admin_access_token';
+const REFRESH_TOKEN_KEY = 'stayvora_admin_refresh_token';
+const AUTH_USER_KEY = 'stayvora_admin_auth_user';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {

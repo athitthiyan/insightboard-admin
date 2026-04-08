@@ -40,7 +40,7 @@ import { SidebarComponent } from './shared/components/sidebar/sidebar.component'
   styles: [`
     .admin-layout {
       min-height: 100vh;
-      background: var(--ib-bg);
+      background: var(--sv-bg);
       display: flex;
       position: relative;
     }

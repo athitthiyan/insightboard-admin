@@ -20,7 +20,7 @@ describe('SidebarComponent', () => {
 
     expect(component.navItems.length).toBe(3);
     expect(component.portfolioLinks.length).toBe(2);
-    expect(element.textContent).toContain('Insight');
+    expect(element.textContent).toContain('Stayvora');
     expect(element.textContent).toContain('Overview');
     expect(element.textContent).toContain('Channels');
     expect(element.textContent).toContain('API Connected');

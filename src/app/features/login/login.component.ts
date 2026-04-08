@@ -11,7 +11,7 @@ import { AuthService } from '../../core/services/auth.service';
   template: `
     <div class="login-page">
       <div class="login-card">
-        <div class="login-card__eyebrow">InsightBoard Admin</div>
+        <div class="login-card__eyebrow">Stayvora Admin</div>
         <h1>Secure <span>Admin Access</span></h1>
         <p>Sign in with your admin account to manage bookings, analytics, and payments.</p>
 
@@ -62,9 +62,9 @@ import { AuthService } from '../../core/services/auth.service';
       place-items: center;
       padding: 24px;
       background:
-        radial-gradient(circle at top left, rgba(34, 211, 238, 0.14), transparent 28%),
-        radial-gradient(circle at bottom right, rgba(99, 102, 241, 0.16), transparent 32%),
-        linear-gradient(160deg, #0b1120 0%, #121a2b 55%, #09111f 100%);
+        radial-gradient(circle at top left, rgba(214, 184, 107, 0.12), transparent 28%),
+        radial-gradient(circle at bottom right, rgba(99, 199, 212, 0.14), transparent 32%),
+        linear-gradient(160deg, #071119 0%, #0b1622 55%, #091320 100%);
     }
 
     .login-card {
@@ -72,10 +72,10 @@ import { AuthService } from '../../core/services/auth.service';
       max-width: 460px;
       padding: 36px;
       border-radius: 24px;
-      border: 1px solid rgba(148, 163, 184, 0.18);
-      background: rgba(15, 23, 42, 0.92);
-      box-shadow: 0 30px 80px rgba(15, 23, 42, 0.45);
-      color: #e2e8f0;
+      border: 1px solid rgba(214, 184, 107, 0.15);
+      background: rgba(7, 17, 25, 0.92);
+      box-shadow: 0 30px 80px rgba(7, 17, 25, 0.45);
+      color: #f0f4ff;
     }
 
     .login-card__eyebrow {
@@ -83,8 +83,8 @@ import { AuthService } from '../../core/services/auth.service';
       margin-bottom: 14px;
       padding: 6px 10px;
       border-radius: 999px;
-      background: rgba(34, 211, 238, 0.1);
-      color: #67e8f9;
+      background: rgba(214, 184, 107, 0.12);
+      color: #f0d58f;
       font-size: 12px;
       font-weight: 700;
       letter-spacing: 0.08em;
@@ -95,11 +95,11 @@ import { AuthService } from '../../core/services/auth.service';
       margin: 0 0 8px;
       font-size: 2.2rem;
       line-height: 1.05;
-      color: #f8fafc;
+      color: #f0f4ff;
     }
 
-    .login-card h1 span { color: #67e8f9; }
-    .login-card p { margin: 0 0 24px; color: #94a3b8; line-height: 1.6; }
+    .login-card h1 span { color: #f0d58f; }
+    .login-card p { margin: 0 0 24px; color: #8a9bbf; line-height: 1.6; }
 
     .login-form { display: grid; gap: 16px; }
 
@@ -107,22 +107,22 @@ import { AuthService } from '../../core/services/auth.service';
       display: grid;
       gap: 8px;
       font-size: 13px;
-      color: #cbd5e1;
+      color: #d0d8e8;
     }
 
     .login-field input {
       width: 100%;
-      border: 1px solid rgba(148, 163, 184, 0.2);
+      border: 1px solid rgba(214, 184, 107, 0.2);
       border-radius: 14px;
-      background: rgba(15, 23, 42, 0.78);
-      color: #f8fafc;
+      background: rgba(7, 17, 25, 0.78);
+      color: #f0f4ff;
       padding: 14px 16px;
       outline: none;
     }
 
     .login-field input:focus {
-      border-color: #22d3ee;
-      box-shadow: 0 0 0 3px rgba(34, 211, 238, 0.16);
+      border-color: #d6b86b;
+      box-shadow: 0 0 0 3px rgba(214, 184, 107, 0.16);
     }
 
     .login-error {
@@ -138,8 +138,8 @@ import { AuthService } from '../../core/services/auth.service';
       border: none;
       border-radius: 14px;
       padding: 14px 16px;
-      background: linear-gradient(135deg, #22d3ee, #6366f1);
-      color: white;
+      background: linear-gradient(135deg, #d6b86b, #f0d58f);
+      color: #0a0f1e;
       font-weight: 700;
       font-size: 14px;
       cursor: pointer;

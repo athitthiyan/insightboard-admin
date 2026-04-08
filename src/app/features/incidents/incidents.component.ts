@@ -93,8 +93,8 @@ type IncidentDashboard = {
     }
 
     .incident-card {
-      background: var(--ib-surface);
-      border: 1px solid var(--ib-border);
+      background: var(--sv-surface);
+      border: 1px solid var(--sv-border);
       border-radius: 16px;
       padding: 18px;
     }
@@ -108,7 +108,7 @@ type IncidentDashboard = {
 
     .incident-card h2 {
       font-size: 1rem;
-      color: var(--ib-text);
+      color: var(--sv-text);
     }
 
     .incident-row {
@@ -117,24 +117,44 @@ type IncidentDashboard = {
       gap: 12px;
       align-items: center;
       padding: 12px 0;
-      border-top: 1px solid var(--ib-border);
+      border-top: 1px solid var(--sv-border);
     }
 
     .incident-row strong {
-      color: var(--ib-text);
+      color: var(--sv-text);
       display: block;
     }
 
     .incident-row p,
     .incident-empty {
-      color: var(--ib-text-muted);
+      color: var(--sv-text-muted);
       font-size: 13px;
       margin: 4px 0 0;
     }
 
-    @media (max-width: 960px) {
+    /* Tablet (768–960px): 2-column layout */
+    @media (min-width: 768px) and (max-width: 960px) {
+      .incident-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+      .incident-grid > :last-child {
+        grid-column: 1 / -1;
+      }
+    }
+
+    /* Mobile (<768px): single column */
+    @media (max-width: 767px) {
       .incident-grid {
         grid-template-columns: 1fr;
+      }
+      .incident-card {
+        padding: 14px;
+        border-radius: 14px;
+      }
+      .incident-row {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
       }
     }
   `],
