@@ -70,11 +70,11 @@ jobs:
         run: npm run build:prod
 
       - name: Verify output directory exists
-        run: test -d dist/insightboard-admin-dashboard/browser
+        run: test -d dist/stayvora-admin
 
       - name: Upload build artefact
         uses: actions/upload-artifact@v4
         with:
           name: insightboard-dist
-          path: dist/insightboard-admin-dashboard/browser/
+          path: dist/stayvora-admin/
           retention-days: 7
