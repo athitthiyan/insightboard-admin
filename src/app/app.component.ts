@@ -41,7 +41,8 @@ import { SidebarComponent } from './shared/components/sidebar/sidebar.component'
     .admin-layout {
       min-height: 100vh;
       background: var(--sv-bg);
-      display: flex;
+      display: grid;
+      grid-template-columns: 1fr;
       position: relative;
     }
 
@@ -55,7 +56,10 @@ import { SidebarComponent } from './shared/components/sidebar/sidebar.component'
 
     .admin-layout__content {
       flex: 1;
-      padding: 16px;
+      width: 100%;
+      max-width: var(--sv-layout-max);
+      margin-inline: auto;
+      padding: var(--sv-space-md);
       overflow-y: auto;
     }
 
@@ -75,11 +79,29 @@ import { SidebarComponent } from './shared/components/sidebar/sidebar.component'
       pointer-events: auto;
     }
 
-    @media (min-width: 769px) {
+    @media (min-width: 768px) {
       .admin-layout__content {
-        padding: 32px;
+        padding: var(--sv-space-lg);
+      }
+    }
+
+    @media (min-width: 1024px) {
+      .admin-layout {
+        grid-template-columns: auto minmax(0, 1fr);
       }
 
+      .admin-layout__content {
+        padding: var(--sv-space-xl);
+      }
+    }
+
+    @media (min-width: 1440px) {
+      .admin-layout__content {
+        padding: var(--sv-space-2xl);
+      }
+    }
+
+    @media (min-width: 768px) {
       .admin-layout__overlay {
         display: none;
       }

@@ -20,7 +20,7 @@ describe('HeaderComponent', () => {
       | 'inventory-updated'
       | 'payout-settled';
   }>;
-  const notificationsUrl = 'http://127.0.0.1:8000/notifications';
+const notificationsUrl = 'http://localhost:8000/notifications';
 
   const authService = {
     user: jest.fn(),
@@ -295,13 +295,13 @@ describe('HeaderComponent', () => {
     });
 
     component.markRead(component.notifications()[0]);
-    const markReadReq = httpMock.expectOne('http://127.0.0.1:8000/notifications/1/read');
+    const markReadReq = httpMock.expectOne('http://localhost:8000/notifications/1/read');
     expect(markReadReq.request.method).toBe('PATCH');
     markReadReq.flush({});
     expect(component.notifications()[0].read).toBe(true);
 
     component.markAllRead();
-    const markAllReq = httpMock.expectOne('http://127.0.0.1:8000/notifications/read-all');
+    const markAllReq = httpMock.expectOne('http://localhost:8000/notifications/read-all');
     expect(markAllReq.request.method).toBe('PATCH');
     markAllReq.flush({});
     expect(component.notifications().every(item => item.read)).toBe(true);
@@ -339,10 +339,10 @@ describe('HeaderComponent', () => {
     });
 
     component.markRead(component.notifications()[0]);
-    httpMock.expectOne('http://127.0.0.1:8000/notifications/1/read').flush({}, { status: 500, statusText: 'Error' });
+    httpMock.expectOne('http://localhost:8000/notifications/1/read').flush({}, { status: 500, statusText: 'Error' });
 
     component.markAllRead();
-    httpMock.expectOne('http://127.0.0.1:8000/notifications/read-all').flush({}, { status: 500, statusText: 'Error' });
+    httpMock.expectOne('http://localhost:8000/notifications/read-all').flush({}, { status: 500, statusText: 'Error' });
 
     expect(component.notifications().every(item => item.read)).toBe(true);
   });

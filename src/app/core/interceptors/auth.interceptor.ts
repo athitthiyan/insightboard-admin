@@ -11,8 +11,13 @@ function addBearerToken(req: HttpRequest<unknown>, token: string): HttpRequest<u
 export const authInterceptor: HttpInterceptorFn = (req: HttpRequest<unknown>, next: HttpHandlerFn) => {
   const auth = inject(AuthService);
   const router = inject(Router);
+
+  // Add withCredentials so HttpOnly cookies are sent with all API requests
+  let authReq = req.clone({ withCredentials: true });
   const token = auth.accessToken();
-  const authReq = token ? addBearerToken(req, token) : req;
+  if (token) {
+    authReq = addBearerToken(authReq, token);
+  }
 
   return next(authReq).pipe(
     catchError((error: unknown) => {
@@ -20,26 +25,16 @@ export const authInterceptor: HttpInterceptorFn = (req: HttpRequest<unknown>, ne
         error instanceof HttpErrorResponse &&
         error.status === 401 &&
         !req.url.includes('/auth/login') &&
-        !req.url.includes('/auth/refresh') &&
-        auth.refreshToken()
+        !req.url.includes('/auth/refresh')
       ) {
         return auth.refreshToken$().pipe(
-          switchMap(res => next(addBearerToken(req, res.access_token))),
+          switchMap(res => next(addBearerToken(req.clone({ withCredentials: true }), res.access_token))),
           catchError(() => {
             auth.logout(false);
             router.navigate(['/login']);
             return throwError(() => error);
           })
         );
-      }
-      if (
-        error instanceof HttpErrorResponse &&
-        error.status === 401 &&
-        !req.url.includes('/auth/login') &&
-        !req.url.includes('/auth/refresh')
-      ) {
-        auth.logout(false);
-        router.navigate(['/login']);
       }
       return throwError(() => error);
     })

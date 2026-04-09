@@ -88,7 +88,7 @@ describe('PlatformSyncService', () => {
     service.connect();
 
     expect(sockets).toHaveLength(1);
-    expect(sockets[0].url).toContain('ws://127.0.0.1:8000/ws/events?token=abc%20123');
+    expect(sockets[0].url).toContain('ws://localhost:8000/ws/events?token=abc%20123');
 
     sockets[0].onopen?.();
     expect(service.connected()).toBe(true);

@@ -258,7 +258,6 @@ const PAYMENT_COLORS: Record<string, { badge: string }> = {
     .data-table {
       width: 100%;
       border-collapse: collapse;
-      min-width: 800px;
     }
 
     .data-table th {
@@ -343,76 +342,75 @@ const PAYMENT_COLORS: Record<string, { badge: string }> = {
       font-weight: 700 !important;
     }
 
-    /* Tablet (768–900px): compressed table with smaller fonts */
-    @media (min-width: 768px) and (max-width: 900px) {
-      .stats-row { gap: 6px; }
-      .stat-pill { min-width: 64px; padding: 8px 12px; }
-      .stat-pill__count { font-size: 1rem; }
+    /* Mobile default: card-based table layout */
+    .data-table,
+    .data-table thead,
+    .data-table tbody,
+    .data-table tr,
+    .data-table td {
+      display: block;
+      width: 100%;
+    }
+
+    .data-table {
+      min-width: 0;
+    }
+
+    .data-table thead {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+      clip: rect(0 0 0 0);
+    }
+
+    .data-table tbody {
+      display: grid;
+      gap: 12px;
+      padding: 12px;
+    }
+
+    .data-row {
+      border: 1px solid var(--sv-border);
+      border-radius: 14px;
+      padding: 12px 14px;
+      background: rgba(255, 255, 255, 0.015);
+    }
+
+    .data-table td {
+      padding: 8px 0;
+      border-bottom: none;
+    }
+
+    .data-table td::before {
+      content: attr(data-label);
+      display: block;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--sv-primary-light);
+      margin-bottom: 4px;
+    }
+
+    .stats-row { gap: 6px; }
+    .stat-pill { min-width: 60px; padding: 8px 10px; }
+    .stat-pill__count { font-size: 1rem; }
+
+    /* md (768px+): restore table layout */
+    @media (min-width: 768px) {
+      .data-table { display: table; width: 100%; min-width: 700px; }
+      .data-table thead { display: table-header-group; position: static; width: auto; height: auto; overflow: visible; clip: auto; }
+      .data-table tbody { display: table-row-group; gap: 0; padding: 0; }
+      .data-table tr, .data-row { display: table-row; border: none; border-radius: 0; padding: 0; background: transparent; }
+      .data-table td { display: table-cell; border-bottom: 1px solid var(--sv-border); padding: 10px 10px; font-size: 12px; }
+      .data-table td::before { display: none; }
       .data-table th { padding: 10px 10px; font-size: 10px; }
-      .data-table td { padding: 10px 10px; font-size: 12px; }
-      .data-table { min-width: 700px; }
       .avatar { width: 26px; height: 26px; font-size: 11px; }
       .tabs { overflow-x: auto; }
       .tab { padding: 8px 12px; font-size: 12px; }
-    }
+      .stat-pill { min-width: 64px; padding: 8px 12px; }
 
-    @media (max-width: 767px) {
-      .data-table,
-      .data-table thead,
-      .data-table tbody,
-      .data-table tr,
-      .data-table td {
-        display: block;
-        width: 100%;
-      }
-
-      .data-table {
-        min-width: 0;
-      }
-
-      .data-table thead {
-        position: absolute;
-        width: 1px;
-        height: 1px;
-        overflow: hidden;
-        clip: rect(0 0 0 0);
-      }
-
-      .data-table tbody {
-        display: grid;
-        gap: 12px;
-        padding: 12px;
-      }
-
-      .data-row {
-        border: 1px solid var(--sv-border);
-        border-radius: 14px;
-        padding: 12px 14px;
-        background: rgba(255, 255, 255, 0.015);
-      }
-
-      .data-table td {
-        padding: 8px 0;
-        border-bottom: none;
-      }
-
-      .data-table td::before {
-        content: attr(data-label);
-        display: block;
-        font-size: 10px;
-        font-weight: 700;
-        letter-spacing: 0.08em;
-        text-transform: uppercase;
-        color: var(--sv-primary-light);
-        margin-bottom: 4px;
-      }
-
-      .stats-row { gap: 6px; }
-      .stat-pill { min-width: 60px; padding: 8px 10px; }
-      .stat-pill__count { font-size: 1rem; }
-    }
-
-    @media (min-width: 768px) {
       .table-toolbar {
         flex-direction: row;
         align-items: center;
@@ -423,6 +421,15 @@ const PAYMENT_COLORS: Record<string, { badge: string }> = {
         flex: 1;
         min-width: 200px;
       }
+    }
+
+    /* lg (1024px+): full table */
+    @media (min-width: 1024px) {
+      .data-table { min-width: 800px; }
+      .data-table th { padding: 12px 14px; font-size: 11px; }
+      .data-table td { padding: 14px 12px; font-size: 13px; }
+      .avatar { width: 30px; height: 30px; font-size: 12px; }
+      .stat-pill { min-width: 76px; }
     }
   `],
 })

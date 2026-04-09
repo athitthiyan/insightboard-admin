@@ -101,13 +101,14 @@ describe('authInterceptor', () => {
   it('logs out immediately for unauthorized requests without a refresh token', () => {
     auth.accessToken.mockReturnValue('token');
     auth.refreshToken.mockReturnValue(null);
+    auth.refreshToken$.mockReturnValue(throwError(() => new Error('missing refresh token')));
 
     http.get('/secure').subscribe({ error: () => undefined });
 
     const req = httpMock.expectOne('/secure');
     req.flush({ detail: 'Unauthorized' }, { status: 401, statusText: 'Unauthorized' });
 
-    expect(auth.refreshToken$).not.toHaveBeenCalled();
+    expect(auth.refreshToken$).toHaveBeenCalled();
     expect(auth.logout).toHaveBeenCalledWith(false);
     expect(router.navigate).toHaveBeenCalledWith(['/login']);
   });

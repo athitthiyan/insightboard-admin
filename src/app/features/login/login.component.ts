@@ -70,8 +70,8 @@ import { AuthService } from '../../core/services/auth.service';
     .login-card {
       width: 100%;
       max-width: 460px;
-      padding: 36px;
-      border-radius: 24px;
+      padding: clamp(20px, 5vw, 36px);
+      border-radius: clamp(16px, 3vw, 24px);
       border: 1px solid rgba(214, 184, 107, 0.15);
       background: rgba(7, 17, 25, 0.92);
       box-shadow: 0 30px 80px rgba(7, 17, 25, 0.45);
@@ -93,7 +93,7 @@ import { AuthService } from '../../core/services/auth.service';
 
     .login-card h1 {
       margin: 0 0 8px;
-      font-size: 2.2rem;
+      font-size: clamp(1.6rem, 5vw, 2.2rem);
       line-height: 1.05;
       color: #f0f4ff;
     }

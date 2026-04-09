@@ -226,6 +226,8 @@ interface RefundActionResponse {
 
     .table-toolbar {
       margin-bottom: 16px;
+      display: flex;
+      justify-content: stretch;
     }
 
     .table-toolbar__select {
@@ -243,7 +245,6 @@ interface RefundActionResponse {
     .data-table {
       width: 100%;
       border-collapse: collapse;
-      min-width: 900px;
     }
 
     .data-table th {
@@ -380,81 +381,85 @@ interface RefundActionResponse {
     .refund-dialog__confirm:hover { opacity: 0.9; }
     @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-    @media (max-width: 767px) {
-      .data-table,
-      .data-table thead,
-      .data-table tbody,
-      .data-table tr,
-      .data-table td {
-        display: block;
-        width: 100%;
-      }
-
-      .data-table {
-        min-width: 0;
-      }
-
-      .data-table thead {
-        position: absolute;
-        width: 1px;
-        height: 1px;
-        overflow: hidden;
-        clip: rect(0 0 0 0);
-      }
-
-      .data-table tbody {
-        display: grid;
-        gap: 12px;
-        padding: 12px;
-      }
-
-      .data-row {
-        border: 1px solid var(--sv-border);
-        border-radius: 14px;
-        padding: 12px 14px;
-        background: rgba(255, 255, 255, 0.015);
-      }
-
-      .data-table td {
-        padding: 8px 0;
-        border-bottom: none;
-      }
-
-      .data-table td::before {
-        content: attr(data-label);
-        display: block;
-        font-size: 10px;
-        font-weight: 700;
-        letter-spacing: 0.08em;
-        text-transform: uppercase;
-        color: var(--sv-primary-light);
-        margin-bottom: 4px;
-      }
+    /* Mobile default: card-based table layout */
+    .data-table,
+    .data-table thead,
+    .data-table tbody,
+    .data-table tr,
+    .data-table td {
+      display: block;
+      width: 100%;
     }
 
-    /* Tablet (768–900px) */
-    @media (min-width: 768px) and (max-width: 900px) {
+    .data-table thead {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+      clip: rect(0 0 0 0);
+    }
+
+    .data-table tbody {
+      display: grid;
+      gap: 12px;
+      padding: 12px;
+    }
+
+    .data-row {
+      border: 1px solid var(--sv-border);
+      border-radius: 14px;
+      padding: 12px 14px;
+      background: rgba(255, 255, 255, 0.015);
+    }
+
+    .data-table td {
+      padding: 8px 0;
+      border-bottom: none;
+    }
+
+    .data-table td::before {
+      content: attr(data-label);
+      display: block;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--sv-primary-light);
+      margin-bottom: 4px;
+    }
+
+    /* md (768px+): restore table layout */
+    @media (min-width: 768px) {
+      .data-table { display: table; width: 100%; min-width: 800px; }
+      .data-table thead { display: table-header-group; position: static; width: auto; height: auto; overflow: visible; clip: auto; }
+      .data-table tbody { display: table-row-group; gap: 0; padding: 0; }
+      .data-table tr, .data-row { display: table-row; border: none; border-radius: 0; padding: 0; background: transparent; }
+      .data-table td { display: table-cell; border-bottom: 1px solid var(--sv-border); padding: 12px 14px; }
+      .data-table td::before { display: none; }
+
       .txn-summary {
         grid-template-columns: repeat(2, 1fr);
         gap: 12px;
         margin-bottom: 20px;
       }
 
+      .table-toolbar {
+        justify-content: flex-end;
+      }
+
       .table-toolbar__select {
         width: 160px;
       }
     }
 
-    /* Desktop (>900px) */
-    @media (min-width: 901px) {
+    /* lg (1024px+): full table */
+    @media (min-width: 1024px) {
+      .data-table { min-width: 900px; }
+
       .txn-summary {
         grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
         gap: 16px;
         margin-bottom: 24px;
-      }
-
-      .table-toolbar__select {
-        width: 160px;
       }
     }
   `],

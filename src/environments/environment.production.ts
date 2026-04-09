@@ -7,5 +7,5 @@ export const environment = {
   paymentAppUrl: 'https://pay.stayvora.co.in',
   paymentPortalUrl: 'https://pay.stayvora.co.in',
   adminPortalUrl: 'https://admin.stayvora.co.in',
-  partnerPortalUrl: 'https://partner-portal.vercel.app',
+  partnerPortalUrl: 'https://partner.stayvora.co.in',
 };

@@ -444,62 +444,73 @@ interface KPICard {
       margin-top: 4px;
     }
 
-    @media (max-width: 767px) {
-      .recent-table table,
-      .recent-table thead,
-      .recent-table tbody,
-      .recent-table tr,
-      .recent-table td {
-        display: block;
-        width: 100%;
-      }
+    /* Mobile default: card-based table layout */
+    .recent-table table,
+    .recent-table thead,
+    .recent-table tbody,
+    .recent-table tr,
+    .recent-table td {
+      display: block;
+      width: 100%;
+    }
 
-      .recent-table thead {
-        position: absolute;
-        width: 1px;
-        height: 1px;
-        overflow: hidden;
-        clip: rect(0 0 0 0);
-      }
+    .recent-table thead {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+      clip: rect(0 0 0 0);
+    }
 
-      .recent-table tbody {
-        display: grid;
-        gap: 12px;
-      }
+    .recent-table tbody {
+      display: grid;
+      gap: 12px;
+    }
 
-      .recent-table tr {
-        border: 1px solid var(--sv-border);
-        border-radius: 14px;
-        padding: 14px;
-        background: rgba(255, 255, 255, 0.015);
-      }
+    .recent-table tr {
+      border: 1px solid var(--sv-border);
+      border-radius: 14px;
+      padding: 14px;
+      background: rgba(255, 255, 255, 0.015);
+    }
 
-      .recent-table td {
-        border-bottom: none;
-        padding: 8px 0;
-      }
+    .recent-table td {
+      border-bottom: none;
+      padding: 8px 0;
+    }
 
-      .recent-table td::before {
-        content: attr(data-label);
-        display: block;
-        font-size: 10px;
-        font-weight: 700;
-        letter-spacing: 0.08em;
-        text-transform: uppercase;
-        color: var(--sv-primary-light);
-        margin-bottom: 4px;
-      }
+    .recent-table td::before {
+      content: attr(data-label);
+      display: block;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--sv-primary-light);
+      margin-bottom: 4px;
+    }
 
-      .chart-card__body {
-        height: 200px;
-      }
+    .chart-card__body {
+      height: 200px;
+    }
 
-      .chart-card__body--donut {
-        height: 180px;
-      }
+    .chart-card__body--donut {
+      height: 180px;
+    }
+
+    /* sm (480px+) */
+    @media (min-width: 480px) {
+      .kpi-grid { grid-template-columns: repeat(2, 1fr); }
     }
 
     @media (min-width: 768px) {
+      /* Restore table layout on tablet+ */
+      .recent-table table { display: table; width: 100%; }
+      .recent-table thead { display: table-header-group; position: static; width: auto; height: auto; overflow: visible; clip: auto; }
+      .recent-table tbody { display: table-row-group; gap: 0; }
+      .recent-table tr { display: table-row; border: none; border-radius: 0; padding: 0; background: transparent; }
+      .recent-table td { display: table-cell; border-bottom: 1px solid var(--sv-border); padding: 14px 12px; }
+      .recent-table td::before { display: none; }
       .dashboard { gap: 24px; }
       .kpi-grid { grid-template-columns: repeat(2, 1fr); gap: 16px; }
       .charts-row,
@@ -508,23 +519,16 @@ interface KPICard {
       .chart-card__body { height: 260px; }
     }
 
-    /* Tablet (768–900px): 2-col KPI, single-col charts */
-    @media (min-width: 768px) and (max-width: 900px) {
-      .kpi-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
-      .charts-row,
-      .bottom-row { grid-template-columns: 1fr; }
-      .chart-card { padding: 18px; }
-      .chart-card__body { height: 220px; }
-      .recent-table table { min-width: 600px; }
-    }
-
-    @media (min-width: 1101px) {
+    @media (min-width: 1024px) {
+      .kpi-grid { grid-template-columns: repeat(4, 1fr); }
       .charts-row,
       .bottom-row { grid-template-columns: 1fr 340px; }
     }
 
-    @media (min-width: 1201px) {
-      .kpi-grid { grid-template-columns: repeat(4, 1fr); }
+    @media (min-width: 1440px) {
+      .kpi-grid { grid-template-columns: repeat(6, 1fr); }
+      .charts-row,
+      .bottom-row { grid-template-columns: minmax(0, 2fr) minmax(320px, 1fr); }
     }
   `],
 })

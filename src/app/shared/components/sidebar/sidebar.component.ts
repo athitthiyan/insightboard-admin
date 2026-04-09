@@ -269,13 +269,15 @@ interface NavItem {
       color: var(--sv-text-subtle);
     }
 
-    @media (max-width: 768px) {
-      .sidebar.collapsed {
-        width: min(84vw, 320px);
-      }
+    /* Mobile default: collapsed sidebar keeps mobile width */
+    .sidebar.collapsed {
+      width: min(84vw, 320px);
     }
 
-    @media (min-width: 769px) {
+    @media (min-width: 768px) {
+      .sidebar.collapsed {
+        width: var(--sidebar-width);
+      }
       .sidebar {
         width: var(--sidebar-width);
         min-height: 100vh;

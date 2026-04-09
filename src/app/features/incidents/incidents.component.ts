@@ -86,17 +86,18 @@ type IncidentDashboard = {
     </div>
   `,
   styles: [`
+    /* Mobile default: single column */
     .incident-grid {
       display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
+      grid-template-columns: 1fr;
       gap: 16px;
     }
 
     .incident-card {
       background: var(--sv-surface);
       border: 1px solid var(--sv-border);
-      border-radius: 16px;
-      padding: 18px;
+      border-radius: 14px;
+      padding: 14px;
     }
 
     .incident-card__header {
@@ -113,9 +114,9 @@ type IncidentDashboard = {
 
     .incident-row {
       display: flex;
-      justify-content: space-between;
-      gap: 12px;
-      align-items: center;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 8px;
       padding: 12px 0;
       border-top: 1px solid var(--sv-border);
     }
@@ -132,29 +133,33 @@ type IncidentDashboard = {
       margin: 4px 0 0;
     }
 
-    /* Tablet (768–960px): 2-column layout */
-    @media (min-width: 768px) and (max-width: 960px) {
+    /* md (768px+): 2-column layout */
+    @media (min-width: 768px) {
       .incident-grid {
         grid-template-columns: repeat(2, 1fr);
       }
       .incident-grid > :last-child {
         grid-column: 1 / -1;
       }
-    }
-
-    /* Mobile (<768px): single column */
-    @media (max-width: 767px) {
-      .incident-grid {
-        grid-template-columns: 1fr;
-      }
       .incident-card {
-        padding: 14px;
-        border-radius: 14px;
+        padding: 18px;
+        border-radius: 16px;
       }
       .incident-row {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 8px;
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+        gap: 12px;
+      }
+    }
+
+    /* lg (1024px+): 3-column layout */
+    @media (min-width: 1024px) {
+      .incident-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+      .incident-grid > :last-child {
+        grid-column: auto;
       }
     }
   `],

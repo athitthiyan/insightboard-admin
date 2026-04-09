@@ -227,8 +227,8 @@ interface AdminNotification {
     .notif-panel {
       position: absolute;
       top: calc(100% + 8px);
-      right: 80px;
-      width: 380px;
+      right: 0;
+      width: min(380px, calc(100vw - 32px));
       max-height: 460px;
       background: var(--sv-bg-2, #0d1321);
       border: 1px solid var(--sv-border, rgba(255,255,255,0.08));
@@ -330,16 +330,28 @@ interface AdminNotification {
       font-weight: 600;
     }
 
-    @media (max-width: 640px) {
+    /* Mobile default: hide secondary info */
+    .admin-header__greeting p,
+    .admin-header__user div:last-child,
+    .admin-header__logout {
+      display: none;
+    }
+
+    .admin-header__notif,
+    .admin-header__user {
+      flex-shrink: 0;
+    }
+
+    /* sm (641px+): show secondary info */
+    @media (min-width: 641px) {
       .admin-header__greeting p,
       .admin-header__user div:last-child,
       .admin-header__logout {
-        display: none;
+        display: block;
       }
 
-      .admin-header__notif,
-      .admin-header__user {
-        flex-shrink: 0;
+      .notif-panel {
+        right: 80px;
       }
     }
 
