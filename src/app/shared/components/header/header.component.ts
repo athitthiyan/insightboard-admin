@@ -420,8 +420,12 @@ export class HeaderComponent implements OnDestroy {
     );
     this.loadNotifications();
     this.initRealtimeNotifications();
-    // Poll every 30s for new notifications
-    this.pollInterval = setInterval(() => this.loadNotifications(), 30_000);
+    // M-12: Poll every 30s for new notifications, but check if tab is visible first
+    this.pollInterval = setInterval(() => {
+      if (!document.hidden) {
+        this.loadNotifications();
+      }
+    }, 30_000);
   }
 
   ngOnDestroy(): void {
@@ -449,6 +453,10 @@ export class HeaderComponent implements OnDestroy {
       });
   }
 
+  /**
+   * M-15: @HostListener automatically cleaned up by Angular when component destroys.
+   * No manual cleanup required as Angular handles listener removal on ngOnDestroy.
+   */
   @HostListener('document:click', ['$event'])
   onDocClick(event: MouseEvent): void {
     const target = event.target as HTMLElement;
@@ -478,12 +486,12 @@ export class HeaderComponent implements OnDestroy {
     if (n.read) return;
     n.read = true;
     this.notifications.update(list => [...list]);
-    this.http.patch(`${environment.apiUrl}/notifications/${n.id}/read`, {}).subscribe({ error: () => {} });
+    this.http.patch(`${environment.apiUrl}/notifications/${n.id}/read`, {}).subscribe({ error: (err) => { console.error('Failed to mark notification as read:', err); } });
   }
 
   markAllRead(): void {
     this.notifications.update(list => list.map(n => ({ ...n, read: true })));
-    this.http.patch(`${environment.apiUrl}/notifications/read-all`, {}).subscribe({ error: () => {} });
+    this.http.patch(`${environment.apiUrl}/notifications/read-all`, {}).subscribe({ error: (err) => { console.error('Failed to mark all notifications as read:', err); } });
   }
 
   getNotifIcon(type: string): string {

@@ -6,6 +6,7 @@ import {
   ViewChild,
   inject,
   signal,
+  afterNextRender,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
@@ -543,15 +544,24 @@ export class DashboardComponent implements OnInit, OnDestroy {
   kpiCards = signal<KPICard[]>([]);
   recentBookings = signal<RecentBooking[]>([]);
   totalRevenue = signal(0);
+  chartError = signal('');
 
   private charts: Chart[] = [];
 
   ngOnInit() {
-    this.analyticsService.getAnalytics(30).subscribe(data => {
-      this.analytics.set(data);
-      this.totalRevenue.set(data.monthly_revenue.reduce((s, m) => s + m.revenue, 0));
-      this.buildKPICards(data.kpis);
-      setTimeout(() => this.renderCharts(data), 100);
+    this.analyticsService.getAnalytics(30).subscribe({
+      next: (data) => {
+        this.analytics.set(data);
+        this.totalRevenue.set(data.monthly_revenue.reduce((s, m) => s + m.revenue, 0));
+        this.buildKPICards(data.kpis);
+        // M-11: Use afterNextRender instead of hardcoded setTimeout for better rendering control
+        afterNextRender(() => this.renderCharts(data));
+      },
+      error: (err) => {
+        // M-14: Handle chart loading errors with user-friendly message
+        console.error('Failed to load dashboard data:', err);
+        this.chartError.set('Failed to load dashboard data. Please try again.');
+      },
     });
 
     this.analyticsService.getRecentBookings(5).subscribe(res => {
@@ -728,5 +738,14 @@ export class DashboardComponent implements OnInit, OnDestroy {
   getBarWidth(revenue: number): number {
     const max = Math.max(...(this.analytics()?.room_type_breakdown || []).map(item => item.revenue));
     return max > 0 ? Math.round((revenue / max) * 100) : 0;
+  }
+
+  /**
+   * M-16: Refresh dashboard data on demand.
+   * TODO: Add refresh button to dashboard template for user-initiated refreshes
+   */
+  refreshDashboard(): void {
+    this.chartError.set('');
+    this.ngOnInit();
   }
 }

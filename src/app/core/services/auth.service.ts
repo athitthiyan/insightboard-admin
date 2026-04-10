@@ -22,6 +22,12 @@ export interface AuthResponse {
 // Access token in memory only; refresh token in HttpOnly cookie (set by backend)
 const AUTH_USER_KEY = 'stayvora_admin_auth_user';
 
+/**
+ * AdminAuthService handles authentication for the InsightBoard admin portal.
+ *
+ * Manages access tokens (in-memory) and refresh tokens (HttpOnly cookies).
+ * Provides user session state via signals and computed properties.
+ */
 @Injectable({ providedIn: 'root' })
 export class AuthService {
   private http = inject(HttpClient);
@@ -36,12 +42,22 @@ export class AuthService {
   readonly isAuthenticated = computed(() => !!this.accessTokenState() && !!this.userState());
   readonly isAdmin = computed(() => this.userState()?.is_admin === true);
 
+  /**
+   * Authenticates user with email and password.
+   * @param email User email
+   * @param password User password
+   * @returns Observable of AuthResponse containing access token and user data
+   */
   login(email: string, password: string): Observable<AuthResponse> {
     return this.http.post<AuthResponse>(`${environment.apiUrl}/auth/login`, { email, password }, { withCredentials: true }).pipe(
       tap(response => this.applyAuth(response))
     );
   }
 
+  /**
+   * Refreshes the access token using the refresh token from HttpOnly cookie.
+   * @returns Observable of AuthResponse with new access token
+   */
   refreshToken$(): Observable<AuthResponse> {
     // Refresh token is sent automatically via HttpOnly cookie
     return this.http.post<AuthResponse>(`${environment.apiUrl}/auth/refresh`, {}, { withCredentials: true }).pipe(
@@ -49,6 +65,10 @@ export class AuthService {
     );
   }
 
+  /**
+   * Logs out the current user and clears authentication state.
+   * @param redirect If true, navigates to login page after logout
+   */
   logout(redirect = true) {
     // Revoke refresh token server-side (cookie sent automatically)
     this.http.post(`${environment.apiUrl}/auth/logout`, {}, { withCredentials: true }).subscribe();
@@ -79,6 +99,12 @@ export class AuthService {
     );
   }
 
+  /**
+   * Applies authentication response and updates internal state.
+   * Stores user profile (non-sensitive) in localStorage.
+   * @private
+   * @param response Authentication response from server
+   */
   private applyAuth(response: AuthResponse) {
     this.accessTokenState.set(response.access_token);
     this.userState.set(response.user);
@@ -86,6 +112,11 @@ export class AuthService {
     localStorage.setItem(AUTH_USER_KEY, JSON.stringify(response.user));
   }
 
+  /**
+   * Reads stored user profile from localStorage.
+   * @private
+   * @returns Cached user profile or null if not found/invalid
+   */
   private readStoredUser(): AuthUser | null {
     const raw = localStorage.getItem(AUTH_USER_KEY);
     if (!raw) {

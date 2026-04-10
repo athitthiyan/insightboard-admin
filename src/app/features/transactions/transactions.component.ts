@@ -46,6 +46,9 @@ interface RefundActionResponse {
   };
 }
 
+// M-13: Configurable pagination constant
+const DEFAULT_PAGE_SIZE = 50;
+
 @Component({
   selector: 'app-transactions',
   standalone: true,
@@ -58,8 +61,8 @@ interface RefundActionResponse {
 
     <div class="txn-summary">
       @for (s of summaryCards; track s.label) {
-        <div class="summary-card" [class]="'summary-card--' + s.color">
-          <span class="summary-card__icon">{{ s.icon }}</span>
+        <div class="summary-card" [class]="'summary-card--' + s.color" [attr.aria-label]="s.label + ': ' + s.value">
+          <span class="summary-card__icon" role="img" [attr.aria-label]="s.label">{{ s.icon }}</span>
           <div>
             <strong>{{ s.value }}</strong>
             <span>{{ s.label }}</span>
@@ -101,9 +104,9 @@ interface RefundActionResponse {
               <td data-label="Amount"><strong class="amount">₹{{ t.amount | number:'1.2-2' }}</strong></td>
               <td data-label="Method">{{ t.card_brand || t.payment_method }} @if (t.card_last4) { ••{{ t.card_last4 }} }</td>
               <td data-label="Status">
-                <span class="badge" [class]="getBadge(t.status)">{{ t.status }}</span>
+                <span class="badge" [class]="getBadge(t.status)" [attr.aria-label]="'Payment status: ' + t.status">{{ t.status }}</span>
                 @if (t.booking?.refund_status) {
-                  <div class="refund-chip">{{ formatRefundStatus(t.booking!.refund_status!) }}</div>
+                  <div class="refund-chip" [attr.aria-label]="'Refund status: ' + formatRefundStatus(t.booking!.refund_status!)">{{ formatRefundStatus(t.booking!.refund_status!) }}</div>
                 }
               </td>
               <td data-label="Date" class="mono-text">{{ t.created_at | date:'MMM d, HH:mm' }}</td>
@@ -484,7 +487,9 @@ export class TransactionsComponent implements OnInit {
   }
 
   loadTransactions() {
-    let params = new HttpParams().set('per_page', 50);
+    // M-13: Use configurable constant instead of hardcoded page size
+    // TODO: Implement full pagination UI with per_page selector and page navigation
+    let params = new HttpParams().set('per_page', DEFAULT_PAGE_SIZE);
 
     if (this.statusFilter) {
       params = params.set('status', this.statusFilter);

@@ -11,30 +11,32 @@ import { SidebarComponent } from './shared/components/sidebar/sidebar.component'
   standalone: true,
   imports: [CommonModule, RouterOutlet, SidebarComponent, HeaderComponent],
   template: `
-    @if (showAdminShell()) {
-      <div class="admin-layout">
-        <button
-          type="button"
-          class="admin-layout__overlay"
-          [class.admin-layout__overlay--visible]="sidebarOpen()"
-          (click)="closeSidebar()"
-          aria-label="Close navigation"
-        ></button>
+    @if (isAuthReady()) {
+      @if (showAdminShell()) {
+        <div class="admin-layout">
+          <button
+            type="button"
+            class="admin-layout__overlay"
+            [class.admin-layout__overlay--visible]="sidebarOpen()"
+            (click)="closeSidebar()"
+            aria-label="Close navigation"
+          ></button>
 
-        <app-sidebar
-          [mobileOpen]="sidebarOpen()"
-          (requestClose)="closeSidebar()"
-        />
+          <app-sidebar
+            [mobileOpen]="sidebarOpen()"
+            (requestClose)="closeSidebar()"
+          />
 
-        <div class="admin-layout__main">
-          <app-header (menuToggle)="toggleSidebar()" />
-          <main class="admin-layout__content">
-            <router-outlet />
-          </main>
+          <div class="admin-layout__main">
+            <app-header (menuToggle)="toggleSidebar()" />
+            <main class="admin-layout__content">
+              <router-outlet />
+            </main>
+          </div>
         </div>
-      </div>
-    } @else {
-      <router-outlet />
+      } @else {
+        <router-outlet />
+      }
     }
   `,
   styles: [`
@@ -114,6 +116,7 @@ export class AppComponent {
   private currentUrl = signal(this.router.url);
 
   sidebarOpen = signal(false);
+  isAuthReady = signal(false);
   showAdminShell = computed(() => this.currentUrl() !== '/login' && this.auth.isAuthenticated());
 
   constructor() {
@@ -124,11 +127,19 @@ export class AppComponent {
         this.closeSidebar();
       });
 
+    // Restore session with proper race condition handling
     const restoreObs = this.auth.restoreSession();
     if (restoreObs) {
       restoreObs.subscribe({
-        error: () => this.auth.logout(false),
+        complete: () => this.isAuthReady.set(true),
+        error: () => {
+          this.auth.logout(false);
+          this.isAuthReady.set(true);
+        },
       });
+    } else {
+      // No restoration needed, ready immediately
+      this.isAuthReady.set(true);
     }
   }
 
