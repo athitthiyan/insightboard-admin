@@ -150,6 +150,25 @@ describe('AuthService', () => {
     expect(localStorage.getItem('stayvora_admin_auth_user')).toBe(JSON.stringify(authResponse.user));
   });
 
+  it('clears auth state when restoreSession refresh fails', () => {
+    TestBed.resetTestingModule();
+    localStorage.setItem('stayvora_admin_auth_user', JSON.stringify(authResponse.user));
+
+    configureTestingModule();
+    let restoredResult: boolean | undefined;
+    service.restoreSession().subscribe(restored => {
+      restoredResult = restored;
+    });
+
+    // Simulate refresh failure
+    httpMock.expectOne(`${environment.apiUrl}/auth/refresh`).flush({}, { status: 401, statusText: 'Unauthorized' });
+
+    expect(restoredResult).toBe(false);
+    expect(service.accessToken()).toBeNull();
+    expect(service.user()).toBeNull();
+    expect(localStorage.getItem('stayvora_admin_auth_user')).toBeNull();
+  });
+
   it('drops malformed stored user payloads', () => {
     TestBed.resetTestingModule();
     localStorage.setItem('stayvora_admin_auth_user', '{bad json');

@@ -37,6 +37,23 @@ interface KPICard {
   imports: [CommonModule, RouterLink],
   template: `
     <div class="dashboard">
+      <div class="dashboard-header">
+        <button
+          class="refresh-btn"
+          [disabled]="isRefreshing()"
+          (click)="refreshDashboard()"
+          type="button"
+          [attr.aria-label]="'Refresh dashboard data'"
+        >
+          @if (isRefreshing()) {
+            <span class="refresh-spinner"></span>
+          } @else {
+            <span>↻</span>
+          }
+          {{ isRefreshing() ? 'Refreshing...' : 'Refresh' }}
+        </button>
+      </div>
+
       <div class="kpi-grid">
         @for (card of kpiCards(); track card.label; let i = $index) {
           <div class="kpi-card" [style]="'animation-delay:' + (i * 0.08) + 's'">
@@ -183,6 +200,52 @@ interface KPICard {
       flex-direction: column;
       gap: 16px;
       animation: fadeInUp 0.5s ease;
+    }
+
+    .dashboard-header {
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+    }
+
+    .refresh-btn {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 16px;
+      border: 1px solid var(--sv-border);
+      border-radius: 8px;
+      background: var(--sv-surface);
+      color: var(--sv-text);
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 500;
+      transition: all 0.2s;
+    }
+
+    .refresh-btn:hover:not(:disabled) {
+      border-color: var(--sv-primary);
+      color: var(--sv-primary);
+      background: rgba(99, 102, 241, 0.08);
+    }
+
+    .refresh-btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .refresh-spinner {
+      display: inline-block;
+      width: 14px;
+      height: 14px;
+      border: 2px solid rgba(99, 102, 241, 0.3);
+      border-top-color: var(--sv-primary);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
     }
 
     .kpi-grid {
@@ -548,6 +611,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
   recentBookings = signal<RecentBooking[]>([]);
   totalRevenue = signal(0);
   chartError = signal('');
+  isRefreshing = signal(false);
 
   private charts: Chart[] = [];
 
@@ -746,11 +810,33 @@ export class DashboardComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * M-16: Refresh dashboard data on demand.
-   * TODO: Add refresh button to dashboard template for user-initiated refreshes
+   * Refresh dashboard data on demand with loading state indicator.
    */
   refreshDashboard(): void {
+    this.isRefreshing.set(true);
     this.chartError.set('');
-    this.ngOnInit();
+
+    this.analyticsService.getAnalytics(30).subscribe({
+      next: (data) => {
+        this.analytics.set(data);
+        this.totalRevenue.set(data.monthly_revenue.reduce((s, m) => s + m.revenue, 0));
+        this.buildKPICards(data.kpis);
+        runInInjectionContext(this.injector, () => {
+          afterNextRender(() => {
+            this.renderCharts(data);
+            this.isRefreshing.set(false);
+          });
+        });
+      },
+      error: (err) => {
+        console.error('Failed to refresh dashboard data:', err);
+        this.chartError.set('Failed to refresh dashboard data. Please try again.');
+        this.isRefreshing.set(false);
+      },
+    });
+
+    this.analyticsService.getRecentBookings(5).subscribe(res => {
+      this.recentBookings.set(res.bookings || []);
+    });
   }
 }

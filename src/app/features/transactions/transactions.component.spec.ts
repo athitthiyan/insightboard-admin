@@ -232,6 +232,68 @@ describe('TransactionsComponent', () => {
     expect(component.refundDialogTxn()).toBeNull();
   });
 
+  it('computes totalPages based on totalRecords and pageSize', async () => {
+    await setup();
+    const fixture = TestBed.createComponent(TransactionsComponent);
+    const component = fixture.componentInstance;
+    component.ngOnInit();
+    httpMock.expectOne(r => r.url === BASE_URL).flush({ transactions: sampleTransactions, total: 25 });
+
+    expect(component.totalPages()).toBe(3); // ceil(25/10)
+
+    component.totalRecords.set(0);
+    expect(component.totalPages()).toBe(1); // max(1, ceil(0/10))
+  });
+
+  it('goToPage navigates to valid pages and reloads', async () => {
+    await setup();
+    const fixture = TestBed.createComponent(TransactionsComponent);
+    const component = fixture.componentInstance;
+    component.ngOnInit();
+    httpMock.expectOne(r => r.url === BASE_URL).flush({ transactions: sampleTransactions, total: 25 });
+
+    component.goToPage(2);
+    expect(component.currentPage()).toBe(2);
+    httpMock.expectOne(r => r.url === BASE_URL && r.params.get('page') === '2').flush({ transactions: [], total: 25 });
+
+    // Out-of-range pages should be ignored
+    component.goToPage(0);
+    expect(component.currentPage()).toBe(2);
+
+    component.goToPage(99);
+    expect(component.currentPage()).toBe(2);
+  });
+
+  it('nextPage and prevPage navigate correctly', async () => {
+    await setup();
+    const fixture = TestBed.createComponent(TransactionsComponent);
+    const component = fixture.componentInstance;
+    component.ngOnInit();
+    httpMock.expectOne(r => r.url === BASE_URL).flush({ transactions: sampleTransactions, total: 25 });
+
+    // Start on page 1, go next
+    component.nextPage();
+    expect(component.currentPage()).toBe(2);
+    httpMock.expectOne(r => r.url === BASE_URL && r.params.get('page') === '2').flush({ transactions: [], total: 25 });
+
+    // Go to last page and try next — should stay
+    component.goToPage(3);
+    httpMock.expectOne(r => r.url === BASE_URL && r.params.get('page') === '3').flush({ transactions: [], total: 25 });
+    component.nextPage();
+    expect(component.currentPage()).toBe(3);
+
+    // Go previous
+    component.prevPage();
+    expect(component.currentPage()).toBe(2);
+    httpMock.expectOne(r => r.url === BASE_URL && r.params.get('page') === '2').flush({ transactions: [], total: 25 });
+
+    // On page 1, prevPage should do nothing
+    component.goToPage(1);
+    httpMock.expectOne(r => r.url === BASE_URL && r.params.get('page') === '1').flush({ transactions: [], total: 25 });
+    component.prevPage();
+    expect(component.currentPage()).toBe(1);
+  });
+
   it('safely handles confirmForceRefund when no dialog transaction exists', async () => {
     await setup();
     const fixture = TestBed.createComponent(TransactionsComponent);

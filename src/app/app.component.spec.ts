@@ -1,4 +1,4 @@
-import { Subject, throwError } from 'rxjs';
+import { of, Subject, throwError } from 'rxjs';
 import { TestBed } from '@angular/core/testing';
 import { NavigationEnd, Router, provideRouter } from '@angular/router';
 
@@ -54,6 +54,17 @@ describe('AppComponent', () => {
     events$.next(new NavigationEnd(1, '/', '/'));
 
     expect(component.showAdminShell()).toBe(true);
+  });
+
+  it('sets isAuthReady after restoreSession completes successfully', () => {
+    authService.isAuthenticated.mockReturnValue(true);
+    authService.restoreSession.mockReturnValue(of(true));
+
+    const fixture = TestBed.createComponent(AppComponent);
+    const component = fixture.componentInstance;
+
+    expect(component.isAuthReady()).toBe(true);
+    expect(authService.logout).not.toHaveBeenCalled();
   });
 
   it('logs out quietly when restoring the session fails', () => {

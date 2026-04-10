@@ -8,4 +8,5 @@ export const environment = {
   paymentPortalUrl: 'https://pay.stayvora.co.in',
   adminPortalUrl: 'https://admin.stayvora.co.in',
   partnerPortalUrl: 'https://partner.stayvora.co.in',
+  sentryDsn: '',
 };

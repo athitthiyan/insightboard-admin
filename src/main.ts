@@ -1,9 +1,16 @@
 import { bootstrapApplication } from '@angular/platform-browser';
 import { appConfig } from './app/app.config';
 import { AppComponent } from './app/app.component';
+import * as Sentry from '@sentry/angular';
+import { environment } from './environments/environment';
 
-// TODO: Add Sentry integration for error tracking and monitoring in production.
-// This would help track dashboard errors and provide insights into user experience issues.
-// Example: import * as Sentry from "@sentry/angular"; Sentry.init({ dsn: "..." });
+// Initialize Sentry for error tracking and monitoring
+if (environment.sentryDsn) {
+  Sentry.init({
+    dsn: environment.sentryDsn,
+    environment: environment.production ? 'production' : 'development',
+    tracesSampleRate: 1.0,
+  });
+}
 
 bootstrapApplication(AppComponent, appConfig).catch(err => console.error(err));

@@ -1,4 +1,4 @@
-import { of } from 'rxjs';
+import { of, throwError } from 'rxjs';
 import { ElementRef } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
@@ -221,6 +221,71 @@ describe('DashboardComponent', () => {
     const component = fixture.componentInstance;
 
     expect(component.getBarWidth(100)).toBe(0);
+  });
+
+  it('sets chartError when ngOnInit analytics request fails', () => {
+    analyticsService.getAnalytics.mockReturnValue(throwError(() => new Error('Network error')));
+    analyticsService.getRecentBookings.mockReturnValue(of(recentBookingsResponse));
+
+    const fixture = TestBed.createComponent(DashboardComponent);
+    const component = fixture.componentInstance;
+    component.ngOnInit();
+
+    expect(component.chartError()).toBe('Failed to load dashboard data. Please try again.');
+  });
+
+  it('refreshDashboard reloads data and re-renders charts', () => {
+    const fixture = TestBed.createComponent(DashboardComponent);
+    const component = fixture.componentInstance;
+    component.revenueChartRef = createCanvasRef();
+    component.statusChartRef = createCanvasRef();
+    component.bookingsChartRef = createCanvasRef();
+
+    // Initial load
+    component.ngOnInit();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (component as any).renderCharts(analyticsResponse);
+
+    const initialChartCount = chartInstances.length;
+
+    // Now refresh
+    component.refreshDashboard();
+    expect(component.isRefreshing()).toBe(true);
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (component as any).renderCharts(analyticsResponse);
+
+    expect(component.analytics()).toEqual(analyticsResponse);
+    expect(chartInstances.length).toBeGreaterThan(initialChartCount);
+  });
+
+  it('refreshDashboard sets chartError on failure', () => {
+    const fixture = TestBed.createComponent(DashboardComponent);
+    const component = fixture.componentInstance;
+    component.ngOnInit();
+
+    // Make refresh fail
+    analyticsService.getAnalytics.mockReturnValue(throwError(() => new Error('Refresh failed')));
+    analyticsService.getRecentBookings.mockReturnValue(of(recentBookingsResponse));
+
+    component.refreshDashboard();
+
+    expect(component.chartError()).toBe('Failed to refresh dashboard data. Please try again.');
+    expect(component.isRefreshing()).toBe(false);
+  });
+
+  it('refreshDashboard falls back to empty bookings when response omits bookings', () => {
+    const fixture = TestBed.createComponent(DashboardComponent);
+    const component = fixture.componentInstance;
+    component.revenueChartRef = createCanvasRef();
+    component.statusChartRef = createCanvasRef();
+    component.bookingsChartRef = createCanvasRef();
+    component.ngOnInit();
+
+    analyticsService.getRecentBookings.mockReturnValue(of({ total: 0 } as RecentBookingsResponse));
+    component.refreshDashboard();
+
+    expect(component.recentBookings()).toEqual([]);
   });
 
   it('destroys charts on teardown', () => {

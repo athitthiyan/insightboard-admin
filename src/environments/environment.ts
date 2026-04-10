@@ -8,4 +8,5 @@ export const environment = {
   paymentPortalUrl: 'http://localhost:4201',
   adminPortalUrl: 'http://localhost:4202',
   partnerPortalUrl: 'http://localhost:4203',
+  sentryDsn: '',
 };

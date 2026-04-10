@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { environment } from '../../../environments/environment';
 
@@ -46,9 +46,6 @@ interface RefundActionResponse {
   };
 }
 
-// M-13: Configurable pagination constant
-const DEFAULT_PAGE_SIZE = 50;
-
 @Component({
   selector: 'app-transactions',
   standalone: true,
@@ -72,13 +69,23 @@ const DEFAULT_PAGE_SIZE = 50;
     </div>
 
     <div class="table-toolbar">
-      <select [(ngModel)]="statusFilter" class="form-control table-toolbar__select" (change)="loadTransactions()">
-        <option value="">All Status</option>
-        <option value="success">Success</option>
-        <option value="failed">Failed</option>
-        <option value="pending">Pending</option>
-        <option value="refunded">Refunded</option>
-      </select>
+      <div class="toolbar-left">
+        <select [(ngModel)]="statusFilter" class="form-control table-toolbar__select" (change)="loadTransactions()">
+          <option value="">All Status</option>
+          <option value="success">Success</option>
+          <option value="failed">Failed</option>
+          <option value="pending">Pending</option>
+          <option value="refunded">Refunded</option>
+        </select>
+      </div>
+      <div class="toolbar-right">
+        <label for="pageSize" class="toolbar-label">Per page:</label>
+        <select id="pageSize" [(ngModel)]="pageSize" class="form-control toolbar-pagesize" (change)="goToPage(1)">
+          <option value="10">10</option>
+          <option value="25">25</option>
+          <option value="50">50</option>
+        </select>
+      </div>
     </div>
 
     <div class="data-table-wrap">
@@ -130,6 +137,30 @@ const DEFAULT_PAGE_SIZE = 50;
           }
         </tbody>
       </table>
+    </div>
+
+    <div class="pagination-controls">
+      <button
+        class="pagination-btn"
+        [disabled]="currentPage() <= 1"
+        (click)="prevPage()"
+        type="button"
+        [attr.aria-label]="'Go to previous page'"
+      >
+        ← Previous
+      </button>
+      <div class="pagination-info">
+        <span class="page-display">Page {{ currentPage() }} of {{ totalPages() }}</span>
+      </div>
+      <button
+        class="pagination-btn"
+        [disabled]="currentPage() >= totalPages()"
+        (click)="nextPage()"
+        type="button"
+        [attr.aria-label]="'Go to next page'"
+      >
+        Next →
+      </button>
     </div>
 
     @if (actionMessage()) {
@@ -230,11 +261,42 @@ const DEFAULT_PAGE_SIZE = 50;
     .table-toolbar {
       margin-bottom: 16px;
       display: flex;
-      justify-content: stretch;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .toolbar-left,
+    .toolbar-right {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .table-toolbar__select,
+    .toolbar-pagesize {
+      padding: 8px 12px;
+      border: 1px solid var(--sv-border);
+      border-radius: 8px;
+      background: var(--sv-surface);
+      color: var(--sv-text);
+      font-size: 13px;
+      cursor: pointer;
     }
 
     .table-toolbar__select {
-      width: 100%;
+      min-width: 120px;
+    }
+
+    .toolbar-pagesize {
+      width: 70px;
+    }
+
+    .toolbar-label {
+      font-size: 12px;
+      color: var(--sv-text-muted);
+      font-weight: 500;
     }
 
     .data-table-wrap {
@@ -319,6 +381,56 @@ const DEFAULT_PAGE_SIZE = 50;
 
     .action-feedback--success { color: #22c55e; }
     .action-feedback--error { color: #ef4444; }
+
+    /* ── Pagination Controls ── */
+    .pagination-controls {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      margin-top: 20px;
+      padding: 16px;
+      background: var(--sv-surface);
+      border: 1px solid var(--sv-border);
+      border-radius: 12px;
+    }
+
+    .pagination-btn {
+      padding: 8px 16px;
+      border: 1px solid var(--sv-border);
+      border-radius: 8px;
+      background: var(--sv-surface);
+      color: var(--sv-text);
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 500;
+      transition: all 0.2s;
+    }
+
+    .pagination-btn:hover:not(:disabled) {
+      border-color: var(--sv-primary);
+      color: var(--sv-primary);
+      background: rgba(99, 102, 241, 0.08);
+    }
+
+    .pagination-btn:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+
+    .pagination-info {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      min-width: 140px;
+      justify-content: center;
+    }
+
+    .page-display {
+      font-size: 13px;
+      color: var(--sv-text-muted);
+      font-weight: 500;
+    }
 
     /* ── Refund Confirmation Dialog ── */
     .refund-dialog-overlay {
@@ -474,6 +586,14 @@ export class TransactionsComponent implements OnInit {
   actionMessage = signal('');
   actionError = signal('');
   statusFilter = '';
+  pageSize = 10;
+  currentPage = signal(1);
+  totalRecords = signal(0);
+
+  totalPages = computed(() => {
+    const total = this.totalRecords();
+    return Math.max(1, Math.ceil(total / this.pageSize));
+  });
 
   summaryCards = [
     { icon: 'C', label: 'Total Transactions', value: '—', color: 'cyan' },
@@ -487,9 +607,9 @@ export class TransactionsComponent implements OnInit {
   }
 
   loadTransactions() {
-    // M-13: Use configurable constant instead of hardcoded page size
-    // TODO: Implement full pagination UI with per_page selector and page navigation
-    let params = new HttpParams().set('per_page', DEFAULT_PAGE_SIZE);
+    let params = new HttpParams()
+      .set('per_page', this.pageSize)
+      .set('page', this.currentPage());
 
     if (this.statusFilter) {
       params = params.set('status', this.statusFilter);
@@ -499,6 +619,7 @@ export class TransactionsComponent implements OnInit {
       next: res => {
         const txns = res.transactions || [];
         this.transactions.set(txns);
+        this.totalRecords.set(res.total || txns.length);
         this.summaryCards[0].value = String(res.total || txns.length);
         this.summaryCards[1].value = String(txns.filter(t => t.status === 'success').length);
         this.summaryCards[2].value = String(txns.filter(t => t.status === 'failed').length);
@@ -560,6 +681,26 @@ export class TransactionsComponent implements OnInit {
 
   formatRefundStatus(status: RefundStatus): string {
     return status.replace(/_/g, ' ');
+  }
+
+  goToPage(page: number): void {
+    const maxPage = this.totalPages();
+    if (page >= 1 && page <= maxPage) {
+      this.currentPage.set(page);
+      this.loadTransactions();
+    }
+  }
+
+  nextPage(): void {
+    if (this.currentPage() < this.totalPages()) {
+      this.goToPage(this.currentPage() + 1);
+    }
+  }
+
+  prevPage(): void {
+    if (this.currentPage() > 1) {
+      this.goToPage(this.currentPage() - 1);
+    }
   }
 
   canForceInitiateRefund(transaction: TransactionRow): boolean {
