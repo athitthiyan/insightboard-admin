@@ -4,6 +4,7 @@ import { PlatformEvent, PlatformSyncService } from './platform-sync.service';
 
 type MockSocket = {
   url: string;
+  protocols: string | string[];
   onopen: (() => void) | null;
   onmessage: ((event: MessageEvent) => void) | null;
   onclose: (() => void) | null;
@@ -15,12 +16,13 @@ describe('PlatformSyncService', () => {
   const originalWebSocket = global.WebSocket;
   const sockets: MockSocket[] = [];
 
-  function installWebSocketMock(factory?: (url: string) => MockSocket): void {
-    const websocketMock = jest.fn((url: string) => {
+  function installWebSocketMock(factory?: (url: string, protocols?: string | string[]) => MockSocket): void {
+    const websocketMock = jest.fn((url: string, protocols?: string | string[]) => {
       const socket = factory
-        ? factory(url)
+        ? factory(url, protocols)
         : {
             url,
+            protocols: protocols || [],
             onopen: null,
             onmessage: null,
             onclose: null,
@@ -88,7 +90,8 @@ describe('PlatformSyncService', () => {
     service.connect();
 
     expect(sockets).toHaveLength(1);
-    expect(sockets[0].url).toContain('ws://localhost:8000/ws/events?token=abc%20123');
+    expect(sockets[0].url).toBe('ws://localhost:8000/ws/events');
+    expect(sockets[0].protocols).toEqual(['access_token', 'abc 123']);
 
     sockets[0].onopen?.();
     expect(service.connected()).toBe(true);
@@ -130,9 +133,10 @@ describe('PlatformSyncService', () => {
   });
 
   it('starts polling fallback on websocket error and when websocket construction throws', () => {
-    installWebSocketMock(url => {
+    installWebSocketMock((url, protocols) => {
       const socket: MockSocket = {
         url,
+        protocols: protocols || [],
         onopen: null,
         onmessage: null,
         onclose: null,

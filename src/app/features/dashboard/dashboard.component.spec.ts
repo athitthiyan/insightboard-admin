@@ -109,9 +109,7 @@ describe('DashboardComponent', () => {
     return new ElementRef(canvas);
   }
 
-  it('loads analytics, builds KPI cards, and renders charts', async () => {
-    jest.useFakeTimers();
-
+  it('loads analytics, builds KPI cards, and renders charts', () => {
     const fixture = TestBed.createComponent(DashboardComponent);
     const component = fixture.componentInstance;
     component.revenueChartRef = createCanvasRef();
@@ -119,7 +117,9 @@ describe('DashboardComponent', () => {
     component.bookingsChartRef = createCanvasRef();
 
     component.ngOnInit();
-    await jest.advanceTimersByTimeAsync(100);
+    // afterNextRender doesn't fire in zone-based test environment; invoke directly
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (component as any).renderCharts(analyticsResponse);
 
     expect(analyticsService.getAnalytics).toHaveBeenCalledWith(30);
     expect(analyticsService.getRecentBookings).toHaveBeenCalledWith(5);
@@ -133,12 +133,9 @@ describe('DashboardComponent', () => {
     expect(component.getStatusBadge('unknown')).toBe('');
     expect(component.getBarWidth(2000)).toBe(50);
     expect(chartInstances).toHaveLength(3);
-
-    jest.useRealTimers();
   });
 
-  it('falls back to an empty recent bookings list when the response omits bookings', async () => {
-    jest.useFakeTimers();
+  it('falls back to an empty recent bookings list when the response omits bookings', () => {
     analyticsService.getRecentBookings.mockReturnValueOnce(of({ total: 0 } as RecentBookingsResponse));
 
     const fixture = TestBed.createComponent(DashboardComponent);
@@ -148,29 +145,23 @@ describe('DashboardComponent', () => {
     component.bookingsChartRef = createCanvasRef();
 
     component.ngOnInit();
-    await jest.advanceTimersByTimeAsync(100);
 
     expect(component.recentBookings()).toEqual([]);
-    jest.useRealTimers();
   });
 
-  it('handles render paths when one or more chart refs are missing', async () => {
-    jest.useFakeTimers();
-
+  it('handles render paths when one or more chart refs are missing', () => {
     const fixture = TestBed.createComponent(DashboardComponent);
     const component = fixture.componentInstance;
     component.revenueChartRef = createCanvasRef();
 
     component.ngOnInit();
-    await jest.advanceTimersByTimeAsync(100);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (component as any).renderCharts(analyticsResponse);
 
     expect(chartInstances).toHaveLength(1);
-    jest.useRealTimers();
   });
 
-  it('executes chart callbacks for gradients and tooltip labels', async () => {
-    jest.useFakeTimers();
-
+  it('executes chart callbacks for gradients and tooltip labels', () => {
     const fixture = TestBed.createComponent(DashboardComponent);
     const component = fixture.componentInstance;
     component.revenueChartRef = createCanvasRef();
@@ -178,7 +169,8 @@ describe('DashboardComponent', () => {
     component.bookingsChartRef = createCanvasRef();
 
     component.ngOnInit();
-    await jest.advanceTimersByTimeAsync(100);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (component as any).renderCharts(analyticsResponse);
 
     const revenueConfig = chartInstances[0].config as {
       data: { datasets: [{ backgroundColor: (input: { chart: { ctx: CanvasContextStub } }) => { addColorStop: jest.Mock } }] };
@@ -214,8 +206,6 @@ describe('DashboardComponent', () => {
     expect(revenueGradient.addColorStop).toHaveBeenCalledTimes(2);
     expect(bookingsLabel).toBe(' 7 bookings');
     expect(bookingsFallbackLabel).toBe(' 0 bookings');
-
-    jest.useRealTimers();
   });
 
   it('returns zero bar width when there is no room type data', () => {

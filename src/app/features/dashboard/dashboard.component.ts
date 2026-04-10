@@ -1,12 +1,14 @@
 import {
   Component,
   ElementRef,
+  Injector,
   OnDestroy,
   OnInit,
   ViewChild,
   inject,
   signal,
   afterNextRender,
+  runInInjectionContext,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
@@ -539,6 +541,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
   @ViewChild('bookingsChart') bookingsChartRef!: ElementRef<HTMLCanvasElement>;
 
   private analyticsService = inject(AnalyticsService);
+  private injector = inject(Injector);
 
   analytics = signal<AnalyticsResponse | null>(null);
   kpiCards = signal<KPICard[]>([]);
@@ -555,7 +558,9 @@ export class DashboardComponent implements OnInit, OnDestroy {
         this.totalRevenue.set(data.monthly_revenue.reduce((s, m) => s + m.revenue, 0));
         this.buildKPICards(data.kpis);
         // M-11: Use afterNextRender instead of hardcoded setTimeout for better rendering control
-        afterNextRender(() => this.renderCharts(data));
+        runInInjectionContext(this.injector, () => {
+          afterNextRender(() => this.renderCharts(data));
+        });
       },
       error: (err) => {
         // M-14: Handle chart loading errors with user-friendly message
