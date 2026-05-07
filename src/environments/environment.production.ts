@@ -4,9 +4,9 @@ export const environment = {
   apiBaseUrl: 'https://hotel-api-production-447d.up.railway.app',
   bookingAppUrl: 'https://stayvora.co.in',
   customerPortalUrl: 'https://stayvora.co.in',
-  paymentAppUrl: 'https://pay.stayvora.co.in',
-  paymentPortalUrl: 'https://pay.stayvora.co.in',
-  adminPortalUrl: 'https://admin.stayvora.co.in',
-  partnerPortalUrl: 'https://partner.stayvora.co.in',
+  paymentAppUrl: 'https://payflow-payment-app.vercel.app',
+  paymentPortalUrl: 'https://payflow-payment-app.vercel.app',
+  adminPortalUrl: 'https://insightboard-admin.vercel.app',
+  partnerPortalUrl: 'https://stayease-partner-portal.vercel.app',
   sentryDsn: '',
 };
