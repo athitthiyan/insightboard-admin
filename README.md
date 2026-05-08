@@ -11,7 +11,7 @@ Hotel analytics and admin operations dashboard for the Stayvora platform.
 [![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
 
-**Live App:** [insightboard-admin.vercel.app](https://insightboard-admin.vercel.app) | **Platform:** [stayvora.co.in](https://stayvora.co.in)
+**Live App:** [admin.stayvora.co.in](https://admin.stayvora.co.in) | **Platform:** [stayvora.co.in](https://stayvora.co.in)
 
 </div>
 
