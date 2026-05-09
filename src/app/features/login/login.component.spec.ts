@@ -128,4 +128,15 @@ describe('LoginComponent', () => {
     expect(component.error()).toBe('Unable to sign in right now.');
     expect(component.loading()).toBe(false);
   });
+
+  it('toggles the password visibility signal', () => {
+    const fixture = TestBed.createComponent(LoginComponent);
+    const component = fixture.componentInstance;
+
+    expect(component.showPassword()).toBe(false);
+    component.showPassword.set(true);
+    expect(component.showPassword()).toBe(true);
+    component.showPassword.set(false);
+    expect(component.showPassword()).toBe(false);
+  });
 });
