@@ -1,7 +1,7 @@
 {
   "name": "stayvora-admin",
   "version": "1.0.0",
-  "description": "Stayvora Admin — Executive Hotel Analytics Dashboard",
+  "description": "Stayvora Admin \u2014 Executive Hotel Analytics Dashboard",
   "scripts": {
     "ng": "ng",
     "start": "ng serve --port 4202",
@@ -23,7 +23,6 @@
     "@angular/platform-browser-dynamic": "^17.3.0",
     "@angular/router": "^17.3.0",
     "@sentry/angular": "^8.0.0",
-    "@typescript-eslint/types": "^8.59.2",
     "chart.js": "^4.4.2",
     "rxjs": "~7.8.0",
     "tslib": "^2.3.0",
@@ -38,7 +37,6 @@
     "@angular-eslint/template-parser": "21.0.1",
     "@angular/cli": "~17.3.0",
     "@angular/compiler-cli": "^17.3.0",
-    "@esbuild/linux-x64": "^0.28.0",
     "@playwright/test": "^1.59.1",
     "@types/jest": "^29.5.14",
     "@typescript-eslint/eslint-plugin": "7.11.0",
